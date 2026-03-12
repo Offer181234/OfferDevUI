@@ -1,149 +1,191 @@
-import React, { useState } from 'react';
-import './css/LoginPage.css';
-import { useNavigate, Link } from 'react-router-dom';
-import { API_BASE_URL } from './config';
+import React, { useState } from "react";
+import "./css/ForgotPassword.css";
+import { API_BASE_URL } from "./config";
+import { useNavigate, Link } from "react-router-dom";
 
 const ForgotPassword = () => {
-  const [formData, setFormData] = useState({
-    email: '',
-    newPassword: '',
-    confirmPassword: ''
-  });
-  const [message, setMessage] = useState('');
-  const [error, setError] = useState('');
-  const [validationErrors, setValidationErrors] = useState({});
-  const [isSubmitting, setIsSubmitting] = useState(false);
   const navigate = useNavigate();
 
-  const handleChange = (e) => {
-    const { name, value } = e.target;
-    setFormData({ ...formData, [name]: value });
-    // Clear validation error when user types
-    if (validationErrors[name]) {
-      setValidationErrors({ ...validationErrors, [name]: '' });
+  const [step, setStep] = useState(1);
+  const [email, setEmail] = useState("");
+  const [otp, setOtp] = useState("");
+  const [newPassword, setNewPassword] = useState("");
+
+  const [message, setMessage] = useState("");
+  const [error, setError] = useState("");
+  const [isLoading, setIsLoading] = useState(false);
+
+  const sendOtp = async () => {
+    setError("");
+    setMessage("");
+
+    if (!email) {
+      setError("Please enter your email");
+      return;
+    }
+
+    setIsLoading(true);
+
+    try {
+      const res = await fetch(`${API_BASE_URL}/api/Users/forgot-password`, {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+          accept: "*/*"
+        },
+        body: JSON.stringify({ email })
+      });
+
+      if (res.ok) {
+        setStep(2);
+        setMessage("OTP sent to your email");
+      } else {
+        const errorText = await res.text();
+        setError(errorText || "User not found");
+      }
+    } catch (err) {
+      setError("Something went wrong while sending OTP");
+    } finally {
+      setIsLoading(false);
     }
   };
 
-  const validate = () => {
-    let tempErrors = {};
-    if (!formData.email) tempErrors.email = 'Email is required';
-    else if (!/\S+@\S+\.\S+/.test(formData.email)) tempErrors.email = 'Please enter a valid email address';
+  const verifyOtp = async () => {
+    setError("");
+    setMessage("");
 
-    if (!formData.newPassword) tempErrors.newPassword = 'New password is required';
-    else if (formData.newPassword.length < 6) tempErrors.newPassword = 'Password must be at least 6 characters';
+    if (!otp) {
+      setError("Please enter OTP");
+      return;
+    }
 
-    if (formData.newPassword !== formData.confirmPassword) tempErrors.confirmPassword = 'Passwords do not match';
-
-    setValidationErrors(tempErrors);
-    return Object.keys(tempErrors).length === 0;
-  };
-
-  const handleSubmit = async (e) => {
-    e.preventDefault();
-    
-    if (!validate()) return;
-
-    setIsSubmitting(true);
-    setMessage('');
-    setError('');
+    setIsLoading(true);
 
     try {
-      const response = await fetch(`${API_BASE_URL}/api/Users/forgot-password`, {
-        method: 'POST',
+      const res = await fetch(`${API_BASE_URL}/api/Users/verify-otp`, {
+        method: "POST",
         headers: {
-          'Content-Type': 'application/json',
-          'accept': '*/*'
+          "Content-Type": "application/json",
+          accept: "*/*"
         },
-        body: JSON.stringify({
-          email: formData.email,
-          newPassword: formData.newPassword
-        })
+        body: JSON.stringify({ email, otp })
       });
 
-      if (response.ok) {
-        setMessage('Password reset successful. Redirecting to login...');
-        setTimeout(() => {
-            navigate('/login');
-        }, 2000);
+      if (res.ok) {
+        setStep(3);
+        setMessage("OTP verified successfully");
       } else {
-        const errorText = await response.text();
-        setError(errorText || 'Failed to reset password.');
+        const errorText = await res.text();
+        setError(errorText || "Invalid OTP");
       }
     } catch (err) {
-      console.error(err);
-      setError('An error occurred. Please try again.');
+      setError("Something went wrong while verifying OTP");
     } finally {
-      setIsSubmitting(false);
+      setIsLoading(false);
+    }
+  };
+
+  const changePassword = async () => {
+    setError("");
+    setMessage("");
+
+    if (!newPassword) {
+      setError("Please enter new password");
+      return;
+    }
+
+    setIsLoading(true);
+
+    try {
+      const res = await fetch(`${API_BASE_URL}/api/Users/change-password`, {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+          accept: "*/*"
+        },
+        body: JSON.stringify({ email, newPassword })
+      });
+
+      if (res.ok) {
+        setMessage("Password reset successful. Redirecting to login...");
+
+        setTimeout(() => {
+          navigate("/login");
+        }, 2000);
+      } else {
+        const errorText = await res.text();
+        setError(errorText || "Reset failed");
+      }
+    } catch (err) {
+      setError("Something went wrong while resetting password");
+    } finally {
+      setIsLoading(false);
     }
   };
 
   return (
-    <div className="login-container">
-      <div className="login-card">
-        <div className="login-header">
-          <div className="brand-logo">Reset Password</div>
-          <p>Enter your email and new password</p>
+    <div className="forgot-wrapper">
+      <div className="forgot-box">
+        <h2>Reset Password</h2>
+        <p className="sub-text">Recover your account access</p>
+
+        <div className="progress-bar">
+          <div
+            className={`progress ${
+              step === 1 ? "step1" : step === 2 ? "step2" : "step3"
+            }`}
+          ></div>
         </div>
 
-        <form className="login-form" onSubmit={handleSubmit}>
-          {message && (
-            <div className="login-error-banner" style={{ backgroundColor: '#ecfdf5', color: '#065f46', borderColor: '#10b981' }}>
-              {message}
-            </div>
-          )}
-          {error && (
-            <div className="login-error-banner">{error}</div>
-          )}
-          
-          <div className="form-group">
-            <label htmlFor="email">Email Address</label>
+        {message && <div className="success">{message}</div>}
+        {error && <div className="error">{error}</div>}
+
+        {step === 1 && (
+          <>
             <input
               type="email"
-              id="email"
-              name="email"
-              value={formData.email}
-              onChange={handleChange}
-              placeholder="name@company.com"
-              className={validationErrors.email ? 'error' : ''}
+              placeholder="Enter your email"
+              value={email}
+              onChange={(e) => setEmail(e.target.value)}
             />
-            {validationErrors.email && <span className="error-text">{validationErrors.email}</span>}
-          </div>
+            <button onClick={sendOtp} disabled={isLoading}>
+              {isLoading ? "Sending..." : "Send OTP"}
+            </button>
+          </>
+        )}
 
-          <div className="form-group">
-            <label htmlFor="newPassword">New Password</label>
+        {step === 2 && (
+          <>
+            <input
+              type="text"
+              placeholder="Enter OTP"
+              value={otp}
+              onChange={(e) => setOtp(e.target.value)}
+            />
+            <button onClick={verifyOtp} disabled={isLoading}>
+              {isLoading ? "Verifying..." : "Verify OTP"}
+            </button>
+          </>
+        )}
+
+        {step === 3 && (
+          <>
             <input
               type="password"
-              id="newPassword"
-              name="newPassword"
-              value={formData.newPassword}
-              onChange={handleChange}
               placeholder="Enter new password"
-              className={validationErrors.newPassword ? 'error' : ''}
+              value={newPassword}
+              onChange={(e) => setNewPassword(e.target.value)}
             />
-            {validationErrors.newPassword && <span className="error-text">{validationErrors.newPassword}</span>}
-          </div>
+            <button onClick={changePassword} disabled={isLoading}>
+              {isLoading ? "Resetting..." : "Reset Password"}
+            </button>
+          </>
+        )}
 
-          <div className="form-group">
-            <label htmlFor="confirmPassword">Confirm Password</label>
-            <input
-              type="password"
-              id="confirmPassword"
-              name="confirmPassword"
-              value={formData.confirmPassword}
-              onChange={handleChange}
-              placeholder="Confirm new password"
-              className={validationErrors.confirmPassword ? 'error' : ''}
-            />
-            {validationErrors.confirmPassword && <span className="error-text">{validationErrors.confirmPassword}</span>}
-          </div>
-
-          <button type="submit" className="submit-btn" disabled={isSubmitting}>
-            {isSubmitting ? 'Resetting...' : 'Reset Password'}
-          </button>
-        </form>
-
-        <div className="login-footer">
-          <Link to="/login">Back to Login</Link>
+        <div style={{ marginTop: "16px", textAlign: "center" }}>
+          <Link to="/login" className="back-login-link">
+            Back to Login
+          </Link>
         </div>
       </div>
     </div>

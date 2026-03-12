@@ -191,6 +191,12 @@ const LoginPage = () => {
         </form>
 
         <div className="login-footer">
+           <p>
+    Don't have an account?{" "}
+    <Link to="/create-user" className="create-user-link">
+      Create User
+    </Link>
+  </p>
           {/* <p>Don't have an account? <a href="#">Create an account</a></p> */}
         </div>
       </div>
