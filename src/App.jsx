@@ -4,6 +4,9 @@ import LoginPage from './LoginPage';
 import Dashboard from './Dashboard';
 import ForgotPassword from './ForgotPassword';
 import CreateUser from "./CreateUser";
+import UserManager from "./pages/UserManager";
+import EditUserPage from "./pages/EditUserPage";
+
 import './css/App.css';
  
 function App() {
@@ -15,6 +18,9 @@ function App() {
         <Route path="/dashboard" element={<Dashboard />} />
         <Route path="/forgot-password" element={<ForgotPassword />} />
         <Route path="/create-user" element={<CreateUser />} />
+        <Route path="/user-manager" element={<UserManager />} />
+        <Route path="/edit-user/:id" element={<EditUserPage />} />
+
       </Routes>
     </div>
   );
