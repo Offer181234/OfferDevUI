@@ -103,6 +103,7 @@ setModules(updated)
 }
 
 
+
 /* UPDATE USER */
 
 const saveUser=()=>{
@@ -110,7 +111,6 @@ const saveUser=()=>{
 const permissionIds = modules
 .filter(m => m.checked && m.permissionId)
 .map(m => m.permissionId)
-console.log("permissionIds",permissionIds);
 
 fetch(`https://localhost:7228/api/Users/${id}`,{
 
