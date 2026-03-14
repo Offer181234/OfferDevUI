@@ -19,22 +19,14 @@ role:"User",
 isActive:true
 })
 
-const [modules,setModules] = useState({
-dashboard:false,
-affiliates:false,
-advertisers:false,
-userManagement:false
-})
+/* MODULE STATE */
 
-/* LOGGED USER */
-
-const editPermissionUser = JSON.parse(localStorage.getItem("user"))
-
-/* CHECK PERMISSION */
-
-const hasPermission = (permission)=>{
-return editPermissionUser?.permissions?.includes(permission)
-}
+const [modules,setModules] = useState([
+{ name:"Dashboard", checked:false, permissionId:null },
+{ name:"Affiliates", checked:false, permissionId:null },
+{ name:"Advertisers", checked:false, permissionId:null },
+{ name:"UserManagement", checked:false, permissionId:null }
+])
 
 
 /* GET USER */
@@ -46,28 +38,36 @@ fetch(`https://localhost:7228/api/Users/${id}`)
 .then(data=>{
 
 setForm({
-firstName:data.firstName,
-lastName:data.lastName,
-email:data.email,
-role:data.role,
-isActive:data.isActive
+firstName:data.firstName || "",
+lastName:data.lastName || "",
+email:data.email || "",
+role:data.role || "User",
+isActive:data.isActive ?? true
 })
 
-if(data.permissions){
+/* MAP PERMISSIONS */
 
-setModules({
-dashboard:data.permissions.includes("Dashboard"),
-affiliates:data.permissions.includes("Affiliates"),
-advertisers:data.permissions.includes("Advertisers"),
-userManagement:data.permissions.includes("UserManagement")
-})
+const updatedModules = modules.map(m=>{
 
+const permission = data.permissions?.find(
+p => p.permissionName === m.name
+)
+
+return{
+...m,
+checked: permission ? true : false,
+permissionId: permission ? permission.permissionId : null
 }
+
+})
+
+setModules(updatedModules)
 
 })
 .catch(err=>console.log(err))
 
 },[id])
+
 
 
 /* INPUT CHANGE */
@@ -80,70 +80,26 @@ setForm({
 }
 
 
-/* ROLE CHANGE */
-
-const handleRoleChange = (e)=>{
-
-const role = e.target.value
-
-setForm({
-...form,
-role:role
-})
-
-if(role === "Super Admin"){
-
-setModules({
-dashboard:true,
-affiliates:true,
-advertisers:true,
-userManagement:true
-})
-
-}
-
-if(role === "Admin"){
-
-setModules({
-dashboard:true,
-affiliates:true,
-advertisers:true,
-userManagement:false
-})
-
-}
-
-if(role === "user"){
-
-setModules({
-dashboard:true,
-affiliates:false,
-advertisers:false,
-userManagement:false
-})
-
-}
-
-}
-
-
 /* TOGGLE ACTIVE */
 
-const toggle=(field)=>{
+const toggleActive=()=>{
 setForm({
 ...form,
-[field]:!form[field]
+isActive:!form.isActive
 })
 }
 
 
 /* TOGGLE MODULE */
 
-const toggleModule=(module)=>{
-setModules({
-...modules,
-[module]:!modules[module]
-})
+const toggleModule=(index)=>{
+
+const updated=[...modules]
+
+updated[index].checked = !updated[index].checked
+
+setModules(updated)
+
 }
 
 
@@ -151,19 +107,10 @@ setModules({
 
 const saveUser=()=>{
 
-const permissionIds=[]
-
-if(modules.dashboard)
-permissionIds.push("Dashboard")
-
-if(modules.affiliates)
-permissionIds.push("Affiliates")
-
-if(modules.advertisers)
-permissionIds.push("Advertisers")
-
-if(modules.userManagement)
-permissionIds.push("UserManagement")
+const permissionIds = modules
+.filter(m => m.checked && m.permissionId)
+.map(m => m.permissionId)
+console.log("permissionIds",permissionIds);
 
 fetch(`https://localhost:7228/api/Users/${id}`,{
 
@@ -181,15 +128,13 @@ email:form.email,
 role:form.role,
 isActive:form.isActive,
 modifiedBy:"Admin",
-permissions:permissionIds
+permissionIds:permissionIds
 
 })
 
 })
 
-.then(()=>{
-alert("User Updated Successfully")
-})
+.then(()=>alert("User Updated Successfully"))
 .catch(err=>console.log(err))
 
 }
@@ -210,11 +155,7 @@ onToggleSidebar={()=>setIsSidebarCollapsed(c=>!c)}
 
 <div className="container-fluid mt-4">
 
-<div className="d-flex justify-content-between align-items-center">
-
 <h3 className="page-title">Update User</h3>
-
-</div>
 
 <hr/>
 
@@ -237,7 +178,8 @@ Roles & Access
 </div>
 
 
-{/* USER DETAILS TAB */}
+
+{/* USER DETAILS */}
 
 {activeTab==="details" && (
 
@@ -283,7 +225,7 @@ onChange={handleChange}
 <input
 type="checkbox"
 checked={form.isActive}
-onChange={()=>toggle("isActive")}
+onChange={toggleActive}
 />
 
 <span>Is Active</span>
@@ -292,26 +234,23 @@ onChange={()=>toggle("isActive")}
 
 </div>
 
-<div className="next-btn">
 <button onClick={()=>setActiveTab("roles")}>
 Next
 </button>
-</div>
 
 </div>
 
 )}
 
 
-{/* ROLES TAB */}
+
+{/* ROLES */}
 
 {activeTab==="roles" && (
 
 <div className="card user-card">
 
 <h5>Roles & Access</h5>
-
-<div className="role-select">
 
 <div className="role-row">
 
@@ -320,14 +259,12 @@ Next
 <select
 name="role"
 value={form.role}
-onChange={handleRoleChange}
+onChange={handleChange}
 >
 <option value="Super Admin">Super Admin</option>
 <option value="Admin">Admin</option>
 <option value="User">User</option>
 </select>
-
-</div>
 
 </div>
 
@@ -337,67 +274,27 @@ onChange={handleRoleChange}
 
 <div className="admin-body">
 
-<label className="module-item">
+{modules.map((module,index)=>(
+
+<label key={module.name} className="module-item">
 
 <input
 type="checkbox"
-checked={modules.dashboard}
-disabled={!hasPermission("Dashboard")}
-onChange={()=>toggleModule("dashboard")}
+checked={module.checked}
+onChange={()=>toggleModule(index)}
 />
 
-Dashboard
+{module.name}
 
 </label>
 
-<label className="module-item">
-
-<input
-type="checkbox"
-checked={modules.affiliates}
-disabled={!hasPermission("Affiliates")}
-onChange={()=>toggleModule("affiliates")}
-/>
-
-Affiliates
-
-</label>
-
-<label className="module-item">
-
-<input
-type="checkbox"
-checked={modules.advertisers}
-disabled={!hasPermission("Advertisers")}
-onChange={()=>toggleModule("advertisers")}
-/>
-
-Advertisers
-
-</label>
-
-<label className="module-item">
-
-<input
-type="checkbox"
-checked={modules.userManagement}
-disabled={!hasPermission("UserManagement")}
-onChange={()=>toggleModule("userManagement")}
-/>
-
-User Management
-
-</label>
+))}
 
 </div>
-
-<div className="next-btn">
 
 <button onClick={saveUser}>
 Save User
 </button>
-
-</div>
 
 </div>
 
