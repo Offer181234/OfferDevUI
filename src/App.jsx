@@ -6,6 +6,8 @@ import ForgotPassword from './ForgotPassword';
 import CreateUser from "./CreateUser";
 import UserManager from "./pages/UserManager";
 import EditUserPage from "./pages/EditUserPage";
+import AffiliatePage from "./pages/AffiliatePage";
+import AdvertisersPage from "./pages/AdvertisersPage";
 
 import './css/App.css';
  
@@ -20,7 +22,8 @@ function App() {
         <Route path="/create-user" element={<CreateUser />} />
         <Route path="/user-manager" element={<UserManager />} />
         <Route path="/edit-user/:id" element={<EditUserPage />} />
-
+        <Route path="/affiliates" element={<AffiliatePage />} />
+        <Route path="/advertisers" element={<AdvertisersPage />} />
       </Routes>
     </div>
   );

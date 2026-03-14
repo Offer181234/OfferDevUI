@@ -1,7 +1,7 @@
 import React, { useState } from "react";
 import "../css/UserModal.css";
 
-const CreateUserModal = ({ onClose }) => {
+const CreateUserModal = ({ onClose, onUserCreated }) => {
 
   const [form,setForm] = useState({
     firstName:"",
@@ -20,7 +20,6 @@ const CreateUserModal = ({ onClose }) => {
     })
   };
 
-  // VALIDATION
   const validate = () => {
 
     let newErrors = {};
@@ -52,15 +51,14 @@ const CreateUserModal = ({ onClose }) => {
     return Object.keys(newErrors).length === 0;
   };
 
-
   const createUser = async () => {
 
-    if(!validate()){
-      return;
-    }
+    if(!validate()) return;
 
     const body = {
+
       id: crypto.randomUUID(),
+
       firstName: form.firstName,
       lastName: form.lastName,
       email: form.email,
@@ -81,15 +79,26 @@ const CreateUserModal = ({ onClose }) => {
 
     try{
 
-      await fetch("https://localhost:7228/api/Users",{
+      const res = await fetch("https://localhost:7228/api/Users",{
+
         method:"POST",
+
         headers:{
           "Content-Type":"application/json"
         },
+
         body:JSON.stringify(body)
+
       });
 
+      const newUser = await res.json();
+
       alert("User Created Successfully");
+
+      if(onUserCreated){
+        onUserCreated(newUser);
+      }
+
       onClose();
 
     }catch(err){
@@ -110,113 +119,50 @@ const CreateUserModal = ({ onClose }) => {
 
         <div className="modal-content shadow-lg border-0">
 
-          {/* HEADER */}
-
           <div className="modal-header">
             <h5 className="modal-title">Create User</h5>
             <button className="btn-close" onClick={onClose}></button>
           </div>
 
-
-          {/* BODY */}
-
           <div className="modal-body">
 
             <div className="row">
 
-              {/* FIRST NAME */}
-
               <div className="col-md-6 mb-3">
                 <label className="form-label">First Name</label>
-
-                <input
-                className="form-control"
-                name="firstName"
-                onChange={handleChange}
-                />
-
-                {errors.firstName && (
-                  <small className="text-danger">{errors.firstName}</small>
-                )}
+                <input className="form-control" name="firstName" onChange={handleChange}/>
+                {errors.firstName && <small className="text-danger">{errors.firstName}</small>}
               </div>
-
-
-              {/* LAST NAME */}
 
               <div className="col-md-6 mb-3">
                 <label className="form-label">Last Name</label>
-
-                <input
-                className="form-control"
-                name="lastName"
-                onChange={handleChange}
-                />
-
-                {errors.lastName && (
-                  <small className="text-danger">{errors.lastName}</small>
-                )}
+                <input className="form-control" name="lastName" onChange={handleChange}/>
+                {errors.lastName && <small className="text-danger">{errors.lastName}</small>}
               </div>
-
-
-              {/* EMAIL */}
 
               <div className="col-md-6 mb-3">
                 <label className="form-label">Email</label>
-
-                <input
-                className="form-control"
-                name="email"
-                onChange={handleChange}
-                />
-
-                {errors.email && (
-                  <small className="text-danger">{errors.email}</small>
-                )}
+                <input className="form-control" name="email" onChange={handleChange}/>
+                {errors.email && <small className="text-danger">{errors.email}</small>}
               </div>
-
-
-              {/* PASSWORD */}
 
               <div className="col-md-6 mb-3">
                 <label className="form-label">Password</label>
-
-                <input
-                type="password"
-                className="form-control"
-                name="passwordHash"
-                onChange={handleChange}
-                />
-
-                {errors.passwordHash && (
-                  <small className="text-danger">{errors.passwordHash}</small>
-                )}
+                <input type="password" className="form-control" name="passwordHash" onChange={handleChange}/>
+                {errors.passwordHash && <small className="text-danger">{errors.passwordHash}</small>}
               </div>
-
-
-              {/* ROLE */}
-
-          
 
             </div>
 
           </div>
 
-
-          {/* FOOTER */}
-
           <div className="modal-footer user-modal-footer">
 
-            <button
-              className="btn btn-secondary btn-sm"
-              onClick={onClose}
-            >
+            <button className="btn btn-secondary btn-sm" onClick={onClose}>
               Cancel
             </button>
 
-            <button
-              className="btn btn-primary btn-sm"
-              onClick={createUser}
-            >
+            <button className="btn btn-primary btn-sm" onClick={createUser}>
               Submit
             </button>
 

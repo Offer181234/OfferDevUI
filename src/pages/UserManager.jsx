@@ -8,16 +8,20 @@ const UserManager = () => {
 
   const navigate = useNavigate();
 
-  const [isSidebarCollapsed,setIsSidebarCollapsed] = useState(false);
-  const [users,setUsers] = useState([]);
-  const [search,setSearch] = useState("");
-  const [showCreate,setShowCreate] = useState(false);
+  const [isSidebarCollapsed, setIsSidebarCollapsed] = useState(false);
+  const [users, setUsers] = useState([]);
+  const [search, setSearch] = useState("");
+  const [showCreate, setShowCreate] = useState(false);
 
-  const [sortField,setSortField] = useState("name");
-  const [sortOrder,setSortOrder] = useState("asc");
+  const [sortField, setSortField] = useState("name");
+  const [sortOrder, setSortOrder] = useState("asc");
 
-  const [currentPage,setCurrentPage] = useState(1);
+  const [currentPage, setCurrentPage] = useState(1);
   const usersPerPage = 10;
+
+  const loggedUser = JSON.parse(localStorage.getItem("user"));
+
+  /* FETCH USERS */
 
   useEffect(() => {
 
@@ -34,12 +38,68 @@ const UserManager = () => {
           modifiedOn: u.modifiedOn
         }));
 
-        setUsers(formattedUsers);
+        /* REMOVE LOGIN USER FROM LIST */
+
+        const filteredUsers = formattedUsers.filter(
+          u => u.id !== loggedUser?.id
+        );
+
+        setUsers(filteredUsers);
 
       })
       .catch(err => console.log(err));
 
   }, []);
+
+
+  /* ADD USER AFTER CREATE */
+
+  const addUserToList = (user) => {
+
+    const formattedUser = {
+      id: user.id,
+      name: `${user.firstName} ${user.lastName}`,
+      email: user.email,
+      role: user.role,
+      createdOn: user.createdOn,
+      modifiedOn: user.modifiedOn
+    };
+
+    if (formattedUser.id !== loggedUser?.id) {
+      setUsers(prev => [formattedUser, ...prev]);
+    }
+
+  };
+
+
+  /* DELETE USER */
+
+  const deleteUser = (id) => {
+
+    if (!window.confirm("Are you sure you want to delete this user?")) {
+      return;
+    }
+
+    fetch(`https://localhost:7228/api/Users/${id}`, {
+      method: "DELETE",
+      headers: {
+        "accept": "*/*"
+      }
+    })
+
+      .then(() => {
+
+        setUsers(prev => prev.filter(u => u.id !== id));
+        alert("User Deleted Successfully");
+
+      })
+
+      .catch(err => console.log(err));
+
+  };
+
+
+  /* DATE FORMAT */
 
   const formatDate = (date) => {
 
@@ -55,55 +115,61 @@ const UserManager = () => {
       minute: "2-digit"
     });
 
-  }
+  };
 
-  const deleteUser=(id)=>{
 
-    setUsers(users.filter(u=>u.id!==id))
-
-  }
+  /* SEARCH */
 
   const filteredUsers = users.filter(u =>
     u.name?.toLowerCase().includes(search.toLowerCase())
-  )
+  );
 
-  const sortedUsers = [...filteredUsers].sort((a,b)=>{
 
-    if(a[sortField] < b[sortField]) return sortOrder === "asc" ? -1 : 1
-    if(a[sortField] > b[sortField]) return sortOrder === "asc" ? 1 : -1
-    return 0
+  /* SORT */
 
-  })
+  const sortedUsers = [...filteredUsers].sort((a, b) => {
 
-  const handleSort=(field)=>{
+    if (a[sortField] < b[sortField]) return sortOrder === "asc" ? -1 : 1;
+    if (a[sortField] > b[sortField]) return sortOrder === "asc" ? 1 : -1;
+    return 0;
 
-    if(sortField===field){
-      setSortOrder(sortOrder==="asc"?"desc":"asc")
-    }else{
-      setSortField(field)
-      setSortOrder("asc")
+  });
+
+
+  const handleSort = (field) => {
+
+    if (sortField === field) {
+      setSortOrder(sortOrder === "asc" ? "desc" : "asc");
+    }
+    else {
+      setSortField(field);
+      setSortOrder("asc");
     }
 
-  }
+  };
+
+
+  /* PAGINATION */
 
   const indexOfLast = currentPage * usersPerPage;
   const indexOfFirst = indexOfLast - usersPerPage;
 
-  const currentUsers = sortedUsers.slice(indexOfFirst,indexOfLast);
+  const currentUsers = sortedUsers.slice(indexOfFirst, indexOfLast);
 
   const totalPages = Math.ceil(sortedUsers.length / usersPerPage);
+
 
   return (
 
     <div className={`of-layout ${isSidebarCollapsed ? 'collapsed' : ''}`}>
 
-      <Sidebar isCollapsed={isSidebarCollapsed}/>
+      <Sidebar isCollapsed={isSidebarCollapsed} />
 
       <section className="of-main">
 
         <Header
-        isSidebarCollapsed={isSidebarCollapsed}
-        onToggleSidebar={()=>setIsSidebarCollapsed(c=>!c)}
+          isSidebarCollapsed={isSidebarCollapsed}
+          onToggleSidebar={() => setIsSidebarCollapsed(c => !c)}
         />
 
         <div className="container mt-4">
@@ -117,8 +183,8 @@ const UserManager = () => {
               <div className="col-md-3">
 
                 <button
-                className="btn btn-primary w-100"
-                onClick={()=>setShowCreate(true)}
+                  className="btn btn-primary w-100"
+                  onClick={() => setShowCreate(true)}
                 >
                   Create User
                 </button>
@@ -130,35 +196,35 @@ const UserManager = () => {
           </div>
 
           <input
-          className="form-control mb-3"
-          placeholder="Search User"
-          value={search}
-          onChange={(e)=>setSearch(e.target.value)}
+            className="form-control mb-3"
+            placeholder="Search User"
+            value={search}
+            onChange={(e) => setSearch(e.target.value)}
           />
 
           <table className="table table-hover table-bordered align-middle">
 
-            <thead style={{background:"#f1f3f5"}}>
+            <thead style={{ background: "#f1f3f5" }}>
 
               <tr>
 
-                <th style={{cursor:"pointer"}} onClick={()=>handleSort("name")}>
+                <th style={{ cursor: "pointer" }} onClick={() => handleSort("name")}>
                   Name
                 </th>
 
-                <th style={{cursor:"pointer"}} onClick={()=>handleSort("email")}>
+                <th style={{ cursor: "pointer" }} onClick={() => handleSort("email")}>
                   Email
                 </th>
 
-                <th style={{cursor:"pointer"}} onClick={()=>handleSort("role")}>
+                <th style={{ cursor: "pointer" }} onClick={() => handleSort("role")}>
                   Role
                 </th>
 
-                <th style={{cursor:"pointer"}} onClick={()=>handleSort("createdOn")}>
+                <th style={{ cursor: "pointer" }} onClick={() => handleSort("createdOn")}>
                   Created Date
                 </th>
 
-                <th style={{cursor:"pointer"}} onClick={()=>handleSort("modifiedOn")}>
+                <th style={{ cursor: "pointer" }} onClick={() => handleSort("modifiedOn")}>
                   Modified Date
                 </th>
 
@@ -170,7 +236,7 @@ const UserManager = () => {
 
             <tbody>
 
-              {currentUsers.map(user=>(
+              {currentUsers.map(user => (
 
                 <tr key={user.id}>
 
@@ -182,20 +248,16 @@ const UserManager = () => {
 
                   <td>
 
-                    {/* Edit Icon */}
-
                     <i
-                    className="bi bi-pencil-square text-warning me-3"
-                    style={{cursor:"pointer",fontSize:"18px"}}
-                    onClick={()=>navigate(`/edit-user/${user.id}`)}
+                      className="bi bi-pencil-square text-warning me-3"
+                      style={{ cursor: "pointer", fontSize: "18px" }}
+                      onClick={() => navigate(`/edit-user/${user.id}`)}
                     ></i>
 
-                    {/* Delete Icon */}
-
                     <i
-                    className="bi bi-trash text-danger"
-                    style={{cursor:"pointer",fontSize:"18px"}}
-                    onClick={()=>deleteUser(user.id)}
+                      className="bi bi-trash text-danger"
+                      style={{ cursor: "pointer", fontSize: "18px" }}
+                      onClick={() => deleteUser(user.id)}
                     ></i>
 
                   </td>
@@ -208,27 +270,58 @@ const UserManager = () => {
 
           </table>
 
+
+          {/* PAGINATION */}
+
           <nav>
 
             <ul className="pagination">
 
-              {Array.from({length:totalPages},(_,i)=>(
+              {/* PREVIOUS */}
+
+              <li className={`page-item ${currentPage === 1 ? "disabled" : ""}`}>
+                <button
+                  className="page-link"
+                  onClick={() => setCurrentPage(currentPage - 1)}
+                  disabled={currentPage === 1}
+                >
+                  Previous
+                </button>
+              </li>
+
+
+              {/* PAGE NUMBERS */}
+
+              {Array.from({ length: totalPages }, (_, i) => (
 
                 <li
-                key={i}
-                className={`page-item ${currentPage===i+1?"active":""}`}
+                  key={i}
+                  className={`page-item ${currentPage === i + 1 ? "active" : ""}`}
                 >
 
                   <button
-                  className="page-link"
-                  onClick={()=>setCurrentPage(i+1)}
+                    className="page-link"
+                    onClick={() => setCurrentPage(i + 1)}
                   >
-                    {i+1}
+                    {i + 1}
                   </button>
 
                 </li>
 
               ))}
+
+
+              {/* NEXT */}
+
+              <li className={`page-item ${currentPage === totalPages ? "disabled" : ""}`}>
+                <button
+                  className="page-link"
+                  onClick={() => setCurrentPage(currentPage + 1)}
+                  disabled={currentPage === totalPages}
+                >
+                  Next
+                </button>
+              </li>
 
             </ul>
 
@@ -239,9 +332,10 @@ const UserManager = () => {
       </section>
 
       {showCreate &&
-      <CreateUserModal
-      onClose={()=>setShowCreate(false)}
-      />
+        <CreateUserModal
+          onClose={() => setShowCreate(false)}
+          onUserCreated={addUserToList}
+        />
       }
 
     </div>

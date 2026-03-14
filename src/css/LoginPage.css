@@ -118,8 +118,8 @@
 
 .toggle-password {
   position: absolute;
-  right: -11.25rem;
-  top: 37%;
+  right: -9.25rem;
+  top: 49%;
   transform: translateY(-50%);
   background: none;
   border: none;
@@ -129,9 +129,7 @@
   padding: 0.25rem;
 }
 
-.toggle-password:hover {
-  color: var(--text-main);
-}
+
 
 /* Captcha Styles */
 .captcha-container {

@@ -145,3 +145,12 @@
     border-bottom: 1px solid var(--line);
   }
 }
+.of-sidebar {
+  display: flex;
+  flex-direction: column;
+  height: 100vh;
+}
+
+.of-sidebar-bottom {
+  margin-top: auto;
+}
