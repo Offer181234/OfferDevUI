@@ -37,6 +37,7 @@ const LoginPage = () => {
   };
 
   const handleChange = (e) => {
+
     const { name, value } = e.target;
 
     setFormData({
@@ -50,6 +51,7 @@ const LoginPage = () => {
         [name]: ''
       });
     }
+
   };
 
   const validate = () => {
@@ -58,7 +60,7 @@ const LoginPage = () => {
 
     if (!formData.email) {
       tempErrors.email = 'Email is required';
-    } 
+    }
     else if (!/\S+@\S+\.\S+/.test(formData.email)) {
       tempErrors.email = 'Enter valid email';
     }
@@ -69,7 +71,7 @@ const LoginPage = () => {
 
     if (!formData.captchaInput) {
       tempErrors.captchaInput = 'Enter security code';
-    } 
+    }
     else if (formData.captchaInput !== captchaData.code) {
       tempErrors.captchaInput = 'Incorrect code';
     }
@@ -103,15 +105,13 @@ const LoginPage = () => {
 
           const data = await response.json();
 
-          // save JWT token
           localStorage.setItem("token", data.token);
-
-          // save user data
           localStorage.setItem("user", JSON.stringify(data));
 
           navigate('/dashboard');
 
-        } else {
+        }
+        else {
 
           setLoginError('Invalid email or password');
 
@@ -124,18 +124,21 @@ const LoginPage = () => {
 
         }
 
-      } catch (error) {
+      }
+      catch (error) {
 
         console.error(error);
         setLoginError('Server connection failed');
 
-      } finally {
+      }
+      finally {
 
         setIsSubmitting(false);
 
       }
 
-    } else {
+    }
+    else {
 
       setIsSubmitting(false);
       setLoginError('Please fill correct details');
@@ -148,6 +151,7 @@ const LoginPage = () => {
       });
 
     }
+
   };
 
   return (
@@ -166,6 +170,8 @@ const LoginPage = () => {
             <div className="login-error-banner">{loginError}</div>
           )}
 
+          {/* EMAIL */}
+
           <div className="form-group">
 
             <label>Email</label>
@@ -181,6 +187,8 @@ const LoginPage = () => {
             {errors.email && <span className="error-text">{errors.email}</span>}
 
           </div>
+
+          {/* PASSWORD */}
 
           <div className="form-group">
 
@@ -208,7 +216,15 @@ const LoginPage = () => {
 
             {errors.password && <span className="error-text">{errors.password}</span>}
 
+            {/* FORGOT PASSWORD */}
+
+            <div className="forgot-password">
+              <Link to="/forgot-password">Forgot Password?</Link>
+            </div>
+
           </div>
+
+          {/* CAPTCHA */}
 
           <div className="form-group captcha-group">
 
@@ -219,8 +235,10 @@ const LoginPage = () => {
               <div className="captcha-display">
 
                 {captchaData.code.split('').map((char, index) => (
-                  <span key={index}
-                    style={{ transform: `rotate(${captchaData.rotations[index]}deg)` }}>
+                  <span
+                    key={index}
+                    style={{ transform: `rotate(${captchaData.rotations[index]}deg)` }}
+                  >
                     {char}
                   </span>
                 ))}
@@ -245,15 +263,25 @@ const LoginPage = () => {
               placeholder="Enter code"
             />
 
-            {errors.captchaInput && <span className="error-text">{errors.captchaInput}</span>}
+            {errors.captchaInput && (
+              <span className="error-text">{errors.captchaInput}</span>
+            )}
 
           </div>
 
-          <button type="submit" className="submit-btn" disabled={isSubmitting}>
+          {/* SUBMIT */}
+
+          <button
+            type="submit"
+            className="submit-btn"
+            disabled={isSubmitting}
+          >
             {isSubmitting ? 'Signing In...' : 'Sign In'}
           </button>
 
         </form>
+
+        {/* FOOTER */}
 
         <div className="login-footer">
 
@@ -269,7 +297,9 @@ const LoginPage = () => {
       </div>
 
     </div>
+
   );
+
 };
 
 export default LoginPage;

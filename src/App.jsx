@@ -8,6 +8,11 @@ import UserManager from "./pages/UserManager";
 import EditUserPage from "./pages/EditUserPage";
 import AffiliatePage from "./pages/AffiliatePage";
 import AdvertisersPage from "./pages/AdvertisersPage";
+import AdvertisersBilling from "./pages/AdvertisersBilling";
+import ImportPage from "./pages/ImportPage";
+import CreateInvoice from "./pages/CreateInvoice";
+import InvoiceSettings from "./pages/InvoiceSettings";
+import CreateInvoiceRule from "./pages/CreateInvoiceRule";
 
 import './css/App.css';
  
@@ -24,6 +29,11 @@ function App() {
         <Route path="/edit-user/:id" element={<EditUserPage />} />
         <Route path="/affiliates" element={<AffiliatePage />} />
         <Route path="/advertisers" element={<AdvertisersPage />} />
+        <Route path="/advertisers-billing" element={<AdvertisersBilling />} />
+        <Route path="/import" element={<ImportPage />} />
+        <Route path="/create-invoice" element={<CreateInvoice />} />
+        <Route path="/invoice-settings" element={<InvoiceSettings />} />
+        <Route path="/create-invoice-rule" element={<CreateInvoiceRule />} />
       </Routes>
     </div>
   );

@@ -1,0 +1,97 @@
+.of-page {
+  padding: 20px;
+}
+
+/* Header */
+.of-page-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 15px;
+}
+
+.of-actions {
+  display: flex;
+  gap: 10px;
+  align-items: center;
+}
+
+.btn {
+  padding: 6px 12px;
+  border-radius: 6px;
+  border: 1px solid #ccc;
+  background: #fff;
+  cursor: pointer;
+}
+
+.btn.primary {
+  background: #5c6bc0;
+  color: white;
+  border: none;
+}
+
+/* Search */
+.of-search {
+  padding: 6px 10px;
+  border-radius: 6px;
+  border: 1px solid #ccc;
+}
+
+/* Select */
+.of-select {
+  padding: 6px;
+  border-radius: 6px;
+}
+
+/* Table */
+.of-table-wrapper {
+  background: #fff;
+  border-radius: 10px;
+  border: 1px solid #ddd;
+  overflow: hidden;
+}
+
+.of-table {
+  width: 100%;
+  border-collapse: collapse;
+}
+
+.of-table th,
+.of-table td {
+  padding: 12px;
+  text-align: left;
+  border-bottom: 1px solid #eee;
+  font-size: 14px;
+}
+
+.of-table th {
+  background: #f9fafb;
+  font-weight: 600;
+}
+
+/* Link style */
+.link {
+  color: #2563eb;
+  cursor: pointer;
+}
+
+/* Status */
+.status {
+  padding: 4px 10px;
+  border-radius: 20px;
+  font-size: 12px;
+}
+
+.status.approved {
+  background: #e6f7ee;
+  color: #16a34a;
+}
+
+/* Options button */
+.option-btn {
+  background: #f1f5f9;
+  border: none;
+  padding: 6px 10px;
+  border-radius: 6px;
+  cursor: pointer;
+}

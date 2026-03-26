@@ -53,10 +53,10 @@ const Header = ({ isSidebarCollapsed, onToggleSidebar }) => {
             Notifications (0)
           </span>
 
-          <span>
+          {/* <span>
             <Icon name="globe" className="of-top-icon" />
             Lang
-          </span>
+          </span> */}
 
         </div>
 

@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from "react";
-import { useParams } from "react-router-dom";
+import { useParams, useNavigate } from "react-router-dom";
 import Header from "../components/Header";
 import Sidebar from "../components/Sidebar";
 import "../css/EditUserPage.css";
@@ -7,6 +7,7 @@ import "../css/EditUserPage.css";
 const EditUserPage = () => {
 
 const { id } = useParams();
+const navigate = useNavigate();
 
 const [isSidebarCollapsed,setIsSidebarCollapsed] = useState(false)
 const [activeTab,setActiveTab] = useState("details")
@@ -19,52 +20,56 @@ role:"User",
 isActive:true
 })
 
-/* MODULE STATE */
-
-const [modules,setModules] = useState([
-{ name:"Dashboard", checked:false, permissionId:null },
-{ name:"Affiliates", checked:false, permissionId:null },
-{ name:"Advertisers", checked:false, permissionId:null },
-{ name:"UserManagement", checked:false, permissionId:null }
-])
+const [permissions,setPermissions] = useState([])
+const [selectedPermissions,setSelectedPermissions] = useState([])
 
 
-/* GET USER */
+
+/* LOAD DATA */
 
 useEffect(()=>{
 
-fetch(`https://localhost:7228/api/Users/${id}`)
-.then(res=>res.json())
-.then(data=>{
+const loadData = async()=>{
+
+try{
+
+/* LOAD ALL PERMISSIONS */
+
+const permissionRes = await fetch("https://localhost:7228/api/Users/permissions")
+const permissionData = await permissionRes.json()
+
+setPermissions(permissionData)
+
+
+/* LOAD USER */
+
+const userRes = await fetch(`https://localhost:7228/api/Users/${id}`)
+const userData = await userRes.json()
 
 setForm({
-firstName:data.firstName || "",
-lastName:data.lastName || "",
-email:data.email || "",
-role:data.role || "User",
-isActive:data.isActive ?? true
+firstName:userData.firstName || "",
+lastName:userData.lastName || "",
+email:userData.email || "",
+role:userData.role || "User",
+isActive:userData.isActive ?? true
 })
 
-/* MAP PERMISSIONS */
+/* USER PERMISSION IDS */
 
-const updatedModules = modules.map(m=>{
+const ids = userData.permissions?.map(p=>p.permissionId) || []
 
-const permission = data.permissions?.find(
-p => p.permissionName === m.name
-)
+setSelectedPermissions(ids)
 
-return{
-...m,
-checked: permission ? true : false,
-permissionId: permission ? permission.permissionId : null
+}
+catch(err){
+
+console.log(err)
+
 }
 
-})
+}
 
-setModules(updatedModules)
-
-})
-.catch(err=>console.log(err))
+loadData()
 
 },[id])
 
@@ -80,6 +85,7 @@ setForm({
 }
 
 
+
 /* TOGGLE ACTIVE */
 
 const toggleActive=()=>{
@@ -90,15 +96,20 @@ isActive:!form.isActive
 }
 
 
-/* TOGGLE MODULE */
 
-const toggleModule=(index)=>{
+/* CHECKBOX TOGGLE */
 
-const updated=[...modules]
+const togglePermission=(permissionId)=>{
 
-updated[index].checked = !updated[index].checked
+setSelectedPermissions(prev=>{
 
-setModules(updated)
+if(prev.includes(permissionId)){
+return prev.filter(id=>id!==permissionId)
+}else{
+return [...prev,permissionId]
+}
+
+})
 
 }
 
@@ -107,10 +118,6 @@ setModules(updated)
 /* UPDATE USER */
 
 const saveUser=()=>{
-
-const permissionIds = modules
-.filter(m => m.checked && m.permissionId)
-.map(m => m.permissionId)
 
 fetch(`https://localhost:7228/api/Users/${id}`,{
 
@@ -128,16 +135,19 @@ email:form.email,
 role:form.role,
 isActive:form.isActive,
 modifiedBy:"Admin",
-permissionIds:permissionIds
+permissionIds:selectedPermissions
 
 })
 
 })
-
-.then(()=>alert("User Updated Successfully"))
+.then(()=>{
+alert("User Updated Successfully")
+navigate("/user-manager")
+})
 .catch(err=>console.log(err))
 
 }
+
 
 
 return(
@@ -274,17 +284,17 @@ onChange={handleChange}
 
 <div className="admin-body">
 
-{modules.map((module,index)=>(
+{permissions.map(permission=>(
 
-<label key={module.name} className="module-item">
+<label key={permission.id} className="module-item">
 
 <input
 type="checkbox"
-checked={module.checked}
-onChange={()=>toggleModule(index)}
+checked={selectedPermissions.includes(permission.id)}
+onChange={()=>togglePermission(permission.id)}
 />
 
-{module.name}
+{permission.permissionName}
 
 </label>
 
