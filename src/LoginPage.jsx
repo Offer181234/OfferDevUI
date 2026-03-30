@@ -107,7 +107,7 @@ const LoginPage = () => {
 
           localStorage.setItem("token", data.token);
           localStorage.setItem("user", JSON.stringify(data));
-
+          console.log(data,'login');
           navigate('/dashboard');
 
         }

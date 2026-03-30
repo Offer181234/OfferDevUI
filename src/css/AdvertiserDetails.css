@@ -1,0 +1,238 @@
+.main-container {
+  display: flex;
+  height: 100vh;
+}
+
+.content {
+  flex: 1;
+  background: #f5f6fa;
+  overflow: auto;
+}
+
+.page-wrapper {
+  display: flex;
+  padding: 20px;
+  gap: 20px;
+  flex-wrap: wrap;
+}
+
+/* PANELS */
+.left-panel {
+  width: 320px;
+  min-width: 280px;
+}
+
+.right-panel {
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  gap: 20px;
+}
+
+/* CARD */
+.card {
+  background: #fff;
+  border-radius: 10px;
+  padding: 18px;
+  box-shadow: 0 2px 6px rgba(0,0,0,0.08);
+}
+
+/* PROFILE */
+.profile-header {
+  display: flex;
+  align-items: center;
+  gap: 15px;
+}
+
+.avatar {
+  width: 60px;
+  height: 60px;
+  background: #2f80ed;
+  color: #fff;
+  border-radius: 50%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-weight: bold;
+}
+
+.sub-text {
+  font-size: 13px;
+  color: gray;
+}
+
+.status {
+  background: green;
+  color: #fff;
+  padding: 3px 8px;
+  border-radius: 5px;
+  font-size: 12px;
+}
+
+/* BUTTONS (2 PER ROW) */
+/* BUTTONS - 2 PER ROW PERFECT */
+.btn-group {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 10px;
+  margin: 15px 0;
+}
+
+.btn-group button {
+  flex: 1 1 calc(50% - 10px); /* 2 buttons per row */
+  padding: 8px;
+  border: 1px solid #3b82f6;
+  background: #e0edff;
+  color: #1d4ed8;
+  border-radius: 6px;
+  font-size: 13px;
+  text-align: center;
+}
+
+.btn-group button:hover {
+  background: #3b82f6;
+  color: #fff;
+}
+
+/* INFO */
+.info-grid {
+  display: grid;
+  gap: 8px;
+  font-size: 14px;
+}
+
+/* DROPDOWN */
+.dropdown-wrapper select {
+  width: 100%;
+  padding: 10px;
+  border-radius: 6px;
+  border: 1px solid #ccc;
+  background: #f8f9fb;
+}
+
+.selected-box {
+  margin-top: 8px;
+  background: #eef2f7;
+  padding: 8px 12px;
+  border-radius: 6px;
+  display: flex;
+  justify-content: space-between;
+}
+
+.clear-btn {
+  cursor: pointer;
+}
+
+/* REPORT */
+.report-box {
+  display: flex;
+  gap: 20px;
+}
+
+.report-item {
+  flex: 1;
+  background: #eaf2fb;
+  padding: 15px;
+  border-radius: 8px;
+}
+
+.chart-placeholder {
+  height: 150px;
+  background: #f1f3f6;
+  margin-top: 10px;
+}
+
+/* TABLE */
+.table-wrapper {
+  overflow-x: auto;
+}
+
+table {
+  width: 100%;
+  min-width: 500px;
+}
+
+th, td {
+  padding: 10px;
+  border-bottom: 1px solid #ddd;
+}
+
+/* RESPONSIVE */
+@media (max-width: 768px) {
+  .btn-group {
+    grid-template-columns: 1fr;
+  }
+
+  .page-wrapper {
+    flex-direction: column;
+  }
+}
+
+/* HEADER ROW FIX */
+.profile-header-top {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+}
+
+/* EDIT BUTTON STYLE */
+.edit-btn {
+  padding: 2px 6px;        /* 🔽 reduce horizontal space */
+  font-size: 11px;         /* slightly smaller */
+  border-radius: 5px;
+  border: 1px solid #3b82f6;
+  background: #e0edff;
+  color: #1d4ed8;
+  cursor: pointer;
+
+  height: 24px;            /* 🔽 smaller height */
+  min-width: auto;         /* remove extra width */
+  width: auto;             /* auto fit content */
+
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+
+  white-space: nowrap;
+}
+
+.edit-btn:hover {
+  background: #3b82f6;
+  color: #fff;
+}
+/* COMMON INPUT + SELECT STYLE */
+.info-grid input,
+.info-grid select,
+.info-grid textarea {
+  width: 100%;
+  padding: 6px 10px;
+  margin-top: 4px;
+
+  border: 1px solid #d1d5db;
+  border-radius: 6px;
+
+  font-size: 13px;
+  background: #f9fafb;
+
+  outline: none;
+  transition: all 0.2s ease;
+}
+
+/* FOCUS EFFECT */
+.info-grid input:focus,
+.info-grid select:focus,
+.info-grid textarea:focus {
+  border-color: #3b82f6;
+  background: #fff;
+}
+
+/* SELECT ARROW CLEAN */
+.info-grid select {
+  cursor: pointer;
+}
+
+/* TEXTAREA FIX */
+.info-grid textarea {
+  min-height: 60px;
+  resize: vertical;
+}

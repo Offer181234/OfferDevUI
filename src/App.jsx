@@ -13,6 +13,8 @@ import ImportPage from "./pages/ImportPage";
 import CreateInvoice from "./pages/CreateInvoice";
 import InvoiceSettings from "./pages/InvoiceSettings";
 import CreateInvoiceRule from "./pages/CreateInvoiceRule";
+import AdvertiserDetails from "./pages/AdvertiserDetails";
+
 
 import './css/App.css';
  
@@ -34,6 +36,7 @@ function App() {
         <Route path="/create-invoice" element={<CreateInvoice />} />
         <Route path="/invoice-settings" element={<InvoiceSettings />} />
         <Route path="/create-invoice-rule" element={<CreateInvoiceRule />} />
+        <Route path="/advertiser/:id" element={<AdvertiserDetails />} />
       </Routes>
     </div>
   );

@@ -95,3 +95,523 @@
   border-radius: 6px;
   cursor: pointer;
 }
+.of-table-wrapper {
+  overflow: visible;
+}
+
+.of-table th {
+  position: relative;
+}
+
+.action-trigger {
+  cursor: pointer;
+  font-weight: 500;
+}
+
+.action-dropdown {
+  position: absolute;
+  top: 42px;
+  left: 0;
+  width: 250px;
+  background: #fff;
+  border-radius: 12px;
+  border: 1px solid #e5e7eb;
+  box-shadow: 0 12px 30px rgba(0,0,0,0.18);
+  z-index: 9999;
+}
+
+.action-dropdown::before {
+  content: "";
+  position: absolute;
+  top: -7px;
+  left: 18px;
+  width: 12px;
+  height: 12px;
+  background: #fff;
+  transform: rotate(45deg);
+  border-left: 1px solid #e5e7eb;
+  border-top: 1px solid #e5e7eb;
+}
+
+.dropdown-section {
+  padding: 6px 0;
+  border-bottom: 1px solid #f1f1f1;
+}
+
+.dropdown-title {
+  font-size: 12px;
+  font-weight: 600;
+  color: #6b7280;
+  padding: 6px 16px;
+}
+
+.dropdown-item {
+  padding: 8px 16px;
+  font-size: 13.5px;
+  cursor: pointer;
+}
+
+.dropdown-item:hover {
+  background: #f5f7fa;
+}
+/* Small button */
+.btn.small {
+  padding: 4px 10px;
+  font-size: 13px;
+  height: 32px;
+  line-height: 1;
+  display: flex;
+  align-items: center;
+}
+
+/* Keep everything in one line */
+.of-actions {
+  display: flex;
+  gap: 8px;
+  align-items: center;
+  flex-wrap: nowrap; /* 🔥 important */
+}
+
+/* Prevent breaking */
+.of-page-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  flex-wrap: nowrap; /* 🔥 important */
+}
+.btn.small {
+  padding: 4px 10px;
+  font-size: 13px;
+  height: 32px;
+  display: flex;
+  align-items: center;
+}
+
+.of-actions {
+  display: flex;
+  gap: 8px;
+  align-items: center;
+  flex-wrap: nowrap;
+}
+
+.of-page-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  flex-wrap: nowrap;
+}
+
+.of-search,
+.of-select {
+  height: 32px;
+  font-size: 13px;
+}
+
+/* 🔥 ROW DROPDOWN */
+.row-dropdown {
+  position: absolute;
+  top: 35px;
+  right: 0;
+  width: 230px;
+  background: #fff;
+  border-radius: 12px;
+  border: 1px solid #e5e7eb;
+  box-shadow: 0 12px 30px rgba(0,0,0,0.18);
+  z-index: 999;
+  padding: 8px 0;
+}
+
+.row-dropdown .dropdown-item {
+  padding: 10px 16px;
+  font-size: 14px;
+  cursor: pointer;
+}
+
+.row-dropdown .dropdown-item:hover {
+  background: #f5f7fa;
+}
+
+.row-dropdown .danger {
+  color: #dc2626;
+}
+.btn.small {
+  padding: 4px 10px;
+  font-size: 13px;
+  height: 32px;
+  display: flex;
+  align-items: center;
+}
+
+.of-actions {
+  display: flex;
+  gap: 8px;
+  align-items: center;
+  flex-wrap: nowrap;
+}
+
+.of-page-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+}
+
+.of-search,
+.of-select {
+  height: 32px;
+  font-size: 13px;
+}
+
+/* OPTION BUTTON */
+.option-btn {
+  background: #64748b;
+  color: #fff;
+  border: none;
+  padding: 6px 10px;
+  border-radius: 8px;
+  cursor: pointer;
+}
+
+.option-btn:hover {
+  background: #475569;
+}
+
+/* DROPDOWN */
+.option-wrapper {
+  position: relative;
+}
+
+.row-dropdown {
+  position: absolute;
+  top: 35px;
+  right: 0;
+  width: 230px;
+  background: #fff;
+  border-radius: 12px;
+  border: 1px solid #e5e7eb;
+  box-shadow: 0 12px 30px rgba(0,0,0,0.18);
+  padding: 8px 0;
+  z-index: 999;
+}
+
+.row-dropdown .dropdown-item {
+  padding: 10px 16px;
+  cursor: pointer;
+}
+
+.row-dropdown .dropdown-item:hover {
+  background: #f5f7fa;
+}
+
+.row-dropdown .danger {
+  color: #dc2626;
+}
+
+/* STATUS */
+.status.approved {
+  background: #e6f7ee;
+  color: #16a34a;
+}
+
+.status.rejected {
+  background: #fee2e2;
+  color: #dc2626;
+}
+.of-table th {
+  position: relative;
+  overflow: visible;
+}
+
+.action-trigger {
+  cursor: pointer;
+  font-weight: 500;
+}
+
+.action-dropdown {
+  position: absolute;
+  top: 35px;
+  left: 0;
+  width: 250px;
+  background: #fff;
+  border-radius: 12px;
+  border: 1px solid #e5e7eb;
+  box-shadow: 0 12px 30px rgba(0,0,0,0.18);
+  z-index: 99999;
+}
+
+.dropdown-item {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+.page-loader {
+  position: fixed;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  background: rgba(255,255,255,0.6);
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  z-index: 99999;
+}
+
+.spinner {
+  width: 50px;
+  height: 50px;
+  border: 5px solid #e5e7eb;
+  border-top: 5px solid #5c6bc0;
+  border-radius: 50%;
+  animation: spin 0.8s linear infinite;
+}
+
+@keyframes spin {
+  to {
+    transform: rotate(360deg);
+  }
+}
+/* Add these new styles to your existing Advertisers.css */
+
+/* Filter Icon Button */
+.filter-icon-wrapper {
+  position: relative;
+  display: inline-block;
+}
+
+.filter-icon-btn {
+  background: #fff;
+  border: 1px solid #ccc;
+  border-radius: 6px;
+  cursor: pointer;
+  width: 32px;
+  height: 32px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  transition: all 0.2s;
+  color: #666;
+}
+
+.filter-icon-btn:hover {
+  background: #f5f5f5;
+  border-color: #5c6bc0;
+  color: #5c6bc0;
+}
+
+.filter-icon-btn svg {
+  width: 18px;
+  height: 18px;
+}
+
+/* Filter Dropdown */
+.filter-dropdown {
+  position: absolute;
+  top: 40px;
+  right: 0;
+  width: 320px;
+  background: #fff;
+  border-radius: 12px;
+  border: 1px solid #e5e7eb;
+  box-shadow: 0 12px 30px rgba(0, 0, 0, 0.18);
+  z-index: 99999;
+  padding: 16px 0;
+}
+
+.filter-dropdown::before {
+  content: "";
+  position: absolute;
+  top: -7px;
+  right: 12px;
+  width: 12px;
+  height: 12px;
+  background: #fff;
+  transform: rotate(45deg);
+  border-left: 1px solid #e5e7eb;
+  border-top: 1px solid #e5e7eb;
+}
+
+.filter-dropdown-header {
+  padding: 0 16px 12px 16px;
+  border-bottom: 1px solid #f1f1f1;
+  font-weight: 600;
+  font-size: 14px;
+  color: #1f2937;
+}
+
+/* Dropdown Sections */
+.dropdown-section {
+  padding: 6px 0;
+  border-bottom: 1px solid #f1f1f1;
+}
+
+.dropdown-title {
+  font-size: 12px;
+  font-weight: 600;
+  color: #6b7280;
+  padding: 6px 16px;
+}
+
+/* Columns Section */
+.columns-select-all {
+  padding: 8px 16px;
+  border-bottom: 1px solid #f1f1f1;
+  margin-bottom: 8px;
+}
+
+.columns-count {
+  display: block;
+  font-size: 12px;
+  color: #6b7280;
+  margin-bottom: 8px;
+}
+
+.select-all-actions {
+  display: flex;
+  gap: 12px;
+}
+
+.select-all-btn,
+.deselect-all-btn,
+.reset-btn {
+  background: none;
+  border: none;
+  color: #5c6bc0;
+  font-size: 12px;
+  cursor: pointer;
+  padding: 0;
+}
+
+.select-all-btn:hover,
+.deselect-all-btn:hover,
+.reset-btn:hover {
+  text-decoration: underline;
+}
+
+/* Columns List */
+.columns-list {
+  max-height: 300px;
+  overflow-y: auto;
+  padding: 0 8px;
+}
+
+.column-checkbox {
+  display: flex;
+  align-items: center;
+  padding: 8px 12px;
+  cursor: pointer;
+  border-radius: 6px;
+  transition: background 0.2s;
+}
+
+.column-checkbox:hover {
+  background: #f9fafb;
+}
+
+.column-checkbox input[type="checkbox"] {
+  margin-right: 10px;
+  width: 16px;
+  height: 16px;
+  cursor: pointer;
+}
+
+.column-checkbox span {
+  font-size: 13px;
+  color: #374151;
+  user-select: none;
+}
+
+/* Filter Input */
+.filter-input {
+  padding: 8px 16px;
+}
+
+.filter-search {
+  width: 100%;
+  padding: 8px 12px;
+  border: 1px solid #e5e7eb;
+  border-radius: 6px;
+  font-size: 13px;
+  outline: none;
+}
+
+.filter-search:focus {
+  border-color: #5c6bc0;
+}
+
+/* Submit Button */
+.submit-btn {
+  display: block;
+  width: calc(100% - 32px);
+  margin: 16px 16px 0 16px;
+  padding: 8px 16px;
+  background: #5c6bc0;
+  color: white;
+  border: none;
+  border-radius: 6px;
+  cursor: pointer;
+  font-size: 14px;
+  transition: background 0.2s;
+}
+
+.submit-btn:hover {
+  background: #4a5aaf;
+}
+
+/* Keep existing styles */
+.of-actions {
+  display: flex;
+  gap: 8px;
+  align-items: center;
+  flex-wrap: nowrap;
+}
+
+.of-page-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+}
+
+.of-search,
+.of-select {
+  height: 32px;
+  font-size: 13px;
+}
+
+/* Responsive adjustments */
+@media (max-width: 1024px) {
+  .of-actions {
+    flex-wrap: wrap;
+  }
+  
+  .filter-dropdown {
+    width: 280px;
+    right: -10px;
+  }
+  
+  .filter-dropdown::before {
+    right: 18px;
+  }
+}
+/* ✅ MODERN FILTER ICON (LIKE YOUR SS) */
+.filter-icon-btn.modern {
+  width: 58px;
+  height: 32px;
+  border-radius: 8px;
+  border: 1px solid #d1d5db;
+  background: #f9fafb;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  cursor: pointer;
+  transition: all 0.2s ease;
+}
+
+.filter-icon-btn.modern:hover {
+  background: #eef2ff;
+  border-color: #3b82f6;
+}
+
+.filter-icon-btn.modern svg {
+  width: 16px;
+  height: 16px;
+}
