@@ -5,17 +5,17 @@ import { useNavigate } from "react-router-dom";
 const AddAdvertiserModal = ({ onClose }) => {
   const navigate = useNavigate();
 
-  // 🔥 GET USER FROM LOCALSTORAGE
+  // GET USER FROM LOCALSTORAGE
   const user = JSON.parse(localStorage.getItem("user"));
 
-  // 🔥 FORM STATE
+  // FORM STATE
   const [formData, setFormData] = useState({
     firstName: "",
     lastName: "",
     companyName: "",
     email: "",
     passwordHash: "",
-    accountManagerId: user?.id || "", // ✅ dynamic from login
+    accountManagerId: user?.id || "",
     status: "Active",
     sendCredentials: false,
     isActive: true
@@ -23,7 +23,7 @@ const AddAdvertiserModal = ({ onClose }) => {
 
   const [loading, setLoading] = useState(false);
 
-  // 🔥 HANDLE INPUT CHANGE
+  // HANDLE INPUT CHANGE
   const handleChange = (e) => {
     const { name, value, type, checked } = e.target;
 
@@ -33,13 +33,13 @@ const AddAdvertiserModal = ({ onClose }) => {
     });
   };
 
-  // 🔥 GENERATE PASSWORD
+  // GENERATE PASSWORD
   const generatePassword = () => {
     const random = Math.random().toString(36).slice(-8);
     setFormData({ ...formData, passwordHash: random });
   };
 
-  // 🔥 SUBMIT API
+  // SUBMIT API
   const handleSubmit = async () => {
     if (!user?.id) {
       alert("User not logged in ❌");
@@ -58,7 +58,7 @@ const AddAdvertiserModal = ({ onClose }) => {
         method: "POST",
         headers: {
           "Content-Type": "application/json",
-          Authorization: `Bearer ${user.token}` // 🔥 token added
+          Authorization: `Bearer ${user.token}`
         },
         body: JSON.stringify({
           id: 0,
@@ -69,9 +69,8 @@ const AddAdvertiserModal = ({ onClose }) => {
       });
 
       alert("Advertiser Created Successfully ✅");
-
-      onClose(); // close modal
-      navigate("/advertisers"); // redirect
+      onClose();
+      navigate("/advertisers");
 
     } catch (error) {
       console.error(error);
@@ -84,15 +83,14 @@ const AddAdvertiserModal = ({ onClose }) => {
   return (
     <div className="modal-overlay">
       <div className="modal-box">
-
         {/* HEADER */}
         <div className="modal-header">
           <h3>Create Advertiser</h3>
           <span className="close-btn" onClick={onClose}>✖</span>
         </div>
 
+        {/* BODY - Fixed structure */}
         <div className="modal-body">
-
           {/* NAME */}
           <div className="form-row">
             <label>Name *</label>
@@ -114,7 +112,7 @@ const AddAdvertiserModal = ({ onClose }) => {
 
           {/* COMPANY */}
           <div className="form-row">
-            <label>Company ( Brand )</label>
+            <label>Company (Brand)</label>
             <input
               name="companyName"
               placeholder="Company"
@@ -137,11 +135,12 @@ const AddAdvertiserModal = ({ onClose }) => {
           {/* PASSWORD */}
           <div className="form-row">
             <label>Password *</label>
-            <div className="flex">
+            <div className="">
               <input
                 name="passwordHash"
                 value={formData.passwordHash}
                 onChange={handleChange}
+                placeholder="Enter or generate password"
               />
               <button
                 className="btn small"
@@ -156,7 +155,10 @@ const AddAdvertiserModal = ({ onClose }) => {
           {/* ACCOUNT MANAGER */}
           <div className="form-row">
             <label>Account Manager</label>
-            <input value={user?.firstName || ""} disabled />
+            <input 
+              value={user?.firstName ? `${user.firstName} ${user.lastName || ''}` : ""} 
+              disabled 
+            />
           </div>
 
           {/* STATUS */}
@@ -174,37 +176,31 @@ const AddAdvertiserModal = ({ onClose }) => {
           </div>
 
           {/* SEND CREDENTIALS */}
-        <div className="form-row toggle">
-  <label className="switch">
-    <input
-      type="checkbox"
-      name="sendCredentials"
-      checked={formData.sendCredentials}
-      onChange={handleChange}
-    />
-    <span className="slider"></span>
-  </label>
+          <div className="form-row toggle">
+            <label className="switch">
+              <input
+                type="checkbox"
+                name="sendCredentials"
+                checked={formData.sendCredentials}
+                onChange={handleChange}
+              />
+              <span className="slider"></span>
+            </label>
+            <span className="toggle-label">
+              Send Credentials to User
+            </span>
+          </div>
 
-  <span className="toggle-label">
-    Send Credentials to User
-  </span>
-</div>
-
-          {/* SUBMIT */}
-        <div className="modal-body">
-  {/* all form rows */}
-
-  <div className="form-actions">
-    <button
-      className="btn primary"
-      onClick={handleSubmit}
-      disabled={loading}
-    >
-      {loading ? "Creating..." : "Submit"}
-    </button>
-  </div>
-</div>
-
+          {/* SUBMIT BUTTON */}
+          <div className="form-actions">
+            <button
+              className="btn primary"
+              onClick={handleSubmit}
+              disabled={loading}
+            >
+              {loading ? "Creating..." : "Submit"}
+            </button>
+          </div>
         </div>
       </div>
     </div>

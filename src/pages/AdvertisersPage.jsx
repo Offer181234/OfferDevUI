@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from "react";
+import React, { useState, useEffect, useRef } from "react";
 import Header from "../components/Header";
 import Sidebar from "../components/Sidebar";
 import AddAdvertiserModal from "../components/AddAdvertiserModal";
@@ -15,12 +15,17 @@ const AdvertisersPage = () => {
   const [loading, setLoading] = useState(true);
 
   const [searchTerm, setSearchTerm] = useState("");
+  const [filterSearchTerm, setFilterSearchTerm] = useState("");
 
   const [openRowIndex, setOpenRowIndex] = useState(null);
   const [openFilterIndex, setOpenFilterIndex] = useState(null);
 
   // Selection
   const [selectedIds, setSelectedIds] = useState([]);
+
+  // Refs for dropdown positioning
+  const filterButtonRef = useRef(null);
+  const [filterDropdownPosition, setFilterDropdownPosition] = useState({ top: 0, right: 0 });
 
   // Column visibility state
   const [visibleColumns, setVisibleColumns] = useState({
@@ -41,24 +46,50 @@ const AdvertisersPage = () => {
     options: true,
   });
 
-  // Column definitions
+  // Column definitions with categories for better organization
   const columns = [
-    { key: "checkbox", label: "Checkbox", type: "checkbox" },
-    { key: "advertiserId", label: "AdvertiserID", type: "text" },
-    { key: "name", label: "Name", type: "text" },
-    { key: "email", label: "Email", type: "text" },
-    { key: "contact", label: "Contact", type: "text" },
-    { key: "company", label: "Company", type: "text" },
-    { key: "country", label: "Country", type: "text" },
-    { key: "manager", label: "Manager", type: "text" },
-    { key: "address", label: "Address", type: "text" },
-    { key: "city", label: "City", type: "text" },
-    { key: "state", label: "State", type: "text" },
-    { key: "zipCode", label: "ZipCode", type: "text" },
-    { key: "createdOn", label: "Created On", type: "date" },
-    { key: "status", label: "Status", type: "status" },
-    { key: "options", label: "Options", type: "options" },
+    { key: "checkbox", label: "Checkbox", category: "Selection" },
+    { key: "advertiserId", label: "Advertiser ID", category: "Basic Info" },
+    { key: "name", label: "Name", category: "Basic Info" },
+    { key: "email", label: "Email", category: "Contact Info" },
+    { key: "contact", label: "Contact", category: "Contact Info" },
+    { key: "company", label: "Company", category: "Business Info" },
+    { key: "country", label: "Country", category: "Location" },
+    { key: "manager", label: "Manager", category: "Business Info" },
+    { key: "address", label: "Address", category: "Location" },
+    { key: "city", label: "City", category: "Location" },
+    { key: "state", label: "State", category: "Location" },
+    { key: "zipCode", label: "Zip Code", category: "Location" },
+    { key: "createdOn", label: "Created On", category: "System Info" },
+    { key: "status", label: "Status", category: "System Info" },
+    { key: "options", label: "Options", category: "Actions" },
   ];
+
+  // Filter columns based on search term
+  const filteredColumns = columns.filter(column =>
+    column.label.toLowerCase().includes(filterSearchTerm.toLowerCase()) ||
+    column.category.toLowerCase().includes(filterSearchTerm.toLowerCase())
+  );
+
+  // Group columns by category
+  const groupedColumns = filteredColumns.reduce((groups, column) => {
+    if (!groups[column.category]) {
+      groups[column.category] = [];
+    }
+    groups[column.category].push(column);
+    return groups;
+  }, {});
+
+  // Update dropdown position when filter button is clicked
+  const updateFilterDropdownPosition = () => {
+    if (filterButtonRef.current) {
+      const rect = filterButtonRef.current.getBoundingClientRect();
+      setFilterDropdownPosition({
+        top: rect.bottom + window.scrollY + 8,
+        right: window.innerWidth - rect.right,
+      });
+    }
+  };
 
   // API
   useEffect(() => {
@@ -80,8 +111,8 @@ const AdvertisersPage = () => {
           city: item.city || "-",
           state: item.state || "-",
           zipCode: item.zipCode || "-",
-          createdOn: item.createdOn 
-            ? new Date(item.createdOn).toLocaleDateString() 
+          createdOn: item.createdOn
+            ? new Date(item.createdOn).toLocaleDateString()
             : "-",
           isActive: item.isActive,
         }));
@@ -101,14 +132,12 @@ const AdvertisersPage = () => {
         body: JSON.stringify({
           id,
           status,
-          isActive: status === "Approved"
-        })
+          isActive: status === "Approved",
+        }),
       });
 
       setData((prev) =>
-        prev.map((item) =>
-          item.id === id ? { ...item, status } : item
-        )
+        prev.map((item) => (item.id === id ? { ...item, status } : item))
       );
     } catch (err) {
       console.error(err);
@@ -120,11 +149,22 @@ const AdvertisersPage = () => {
   // Close dropdowns when clicking outside
   useEffect(() => {
     const close = (e) => {
-      if (!e.target.closest(".action-trigger") && !e.target.closest(".option-wrapper")) {
+      // Only close row dropdown if clicking outside both the trigger and dropdown
+      if (
+        !e.target.closest(".action-trigger") &&
+        !e.target.closest(".action-dropdown") &&
+        !e.target.closest(".option-wrapper") &&
+        !e.target.closest(".row-dropdown")
+      ) {
         setOpenRowIndex(null);
       }
-      if (!e.target.closest(".filter-icon-btn") && !e.target.closest(".filter-dropdown")) {
+      // Only close filter dropdown if clicking outside both the filter button and filter dropdown
+      if (
+        !e.target.closest(".filter-icon-btn") &&
+        !e.target.closest(".filter-dropdown")
+      ) {
         setOpenFilterIndex(null);
+        setFilterSearchTerm("");
       }
     };
     window.addEventListener("click", close);
@@ -140,16 +180,16 @@ const AdvertisersPage = () => {
 
   // Toggle column visibility
   const toggleColumn = (columnKey) => {
-    setVisibleColumns(prev => ({
+    setVisibleColumns((prev) => ({
       ...prev,
-      [columnKey]: !prev[columnKey]
+      [columnKey]: !prev[columnKey],
     }));
   };
 
   // Select all columns
   const selectAllColumns = () => {
     const allSelected = {};
-    columns.forEach(col => {
+    columns.forEach((col) => {
       allSelected[col.key] = true;
     });
     setVisibleColumns(allSelected);
@@ -158,7 +198,7 @@ const AdvertisersPage = () => {
   // Deselect all columns
   const deselectAllColumns = () => {
     const allDeselected = {};
-    columns.forEach(col => {
+    columns.forEach((col) => {
       allDeselected[col.key] = false;
     });
     setVisibleColumns(allDeselected);
@@ -186,7 +226,14 @@ const AdvertisersPage = () => {
   };
 
   // Get selected columns count
-  const selectedColumnsCount = Object.values(visibleColumns).filter(v => v === true).length;
+  const selectedColumnsCount = Object.values(visibleColumns).filter(
+    (v) => v === true
+  ).length;
+
+  // Clear filter search
+  const clearFilterSearch = () => {
+    setFilterSearchTerm("");
+  };
 
   return (
     <div className="of-layout">
@@ -199,9 +246,7 @@ const AdvertisersPage = () => {
       <div className="of-main">
         <Header
           isSidebarCollapsed={isSidebarCollapsed}
-          onToggleSidebar={() =>
-            setIsSidebarCollapsed(!isSidebarCollapsed)
-          }
+          onToggleSidebar={() => setIsSidebarCollapsed(!isSidebarCollapsed)}
         />
 
         <div className="of-page">
@@ -217,102 +262,163 @@ const AdvertisersPage = () => {
                 + Add Advertiser
               </button>
 
-              <button className="btn" onClick={() => navigate("/import")}>
+              <button className="btn small" onClick={() => navigate("/import")}>
                 Import
               </button>
 
               <input
                 type="text"
-                placeholder="Search"
+                placeholder="Search advertisers..."
                 className="of-search"
                 value={searchTerm}
                 onChange={(e) => setSearchTerm(e.target.value)}
               />
 
-              {/* Filters Icon Button - Positioned after search */}
+              {/* Filters Icon Button */}
               <div className="filter-icon-wrapper">
-                <button 
-  className="filter-icon-btn modern"
-  onClick={(e) => {
-    e.stopPropagation();
-    setOpenFilterIndex(openFilterIndex === "columns" ? null : "columns");
-  }}
->
-  <svg viewBox="0 0 24 24" fill="none">
-    <path 
-      d="M3 5H21L14 13V19L10 21V13L3 5Z" 
-      stroke="#3B82F6" 
-      strokeWidth="1.8" 
-      strokeLinecap="round" 
-      strokeLinejoin="round"
-    />
-  </svg>
-</button>
+                <button
+                  ref={filterButtonRef}
+                  className="filter-icon-btn modern"
+                  onClick={(e) => {
+                    e.stopPropagation();
+                    if (openFilterIndex === "columns") {
+                      setOpenFilterIndex(null);
+                      setFilterSearchTerm("");
+                    } else {
+                      updateFilterDropdownPosition();
+                      setOpenFilterIndex("columns");
+                    }
+                  }}
+                >
+                  <svg viewBox="0 0 24 24" fill="none">
+                    <path
+                      d="M3 5H21L14 13V19L10 21V13L3 5Z"
+                      stroke="#3B82F6"
+                      strokeWidth="1.8"
+                      strokeLinecap="round"
+                      strokeLinejoin="round"
+                    />
+                  </svg>
+                </button>
 
                 {openFilterIndex === "columns" && (
-                  <div className="filter-dropdown">
+                  <div
+                    className="filter-dropdown"
+                    style={{
+                      position: 'fixed',
+                      top: `${filterDropdownPosition.top}px`,
+                      right: `${filterDropdownPosition.right}px`,
+                    }}
+                    onClick={(e) => e.stopPropagation()}
+                  >
                     <div className="filter-dropdown-header">
                       <span>Filters & Columns</span>
                     </div>
-                    
+
                     {/* Filters Section */}
                     <div className="dropdown-section">
-                      <div className="dropdown-title">Filters</div>
-                      <div className="filter-input">
+                      <div className="dropdown-title">Search Columns</div>
+                      <div className="filter-input-group">
                         <input
                           type="text"
-                          placeholder="Search filters..."
+                          placeholder="Search columns by name or category..."
                           className="filter-search"
+                          value={filterSearchTerm}
+                          onChange={(e) => setFilterSearchTerm(e.target.value)}
+                          autoFocus
                         />
+                       
                       </div>
                     </div>
 
                     {/* Columns Section */}
                     <div className="dropdown-section">
-                      <div className="dropdown-title">Columns</div>
+                      <div className="dropdown-title">
+                        <span>Column Visibility</span>
+                        <span className="status-badge active"></span>
+                      </div>
                       <div className="columns-select-all">
-                        <span className="columns-count">{selectedColumnsCount} of {columns.length} selected</span>
+                        <span className="columns-count">
+                          {selectedColumnsCount} of {columns.length} selected
+                        </span>
                         <div className="select-all-actions">
-                          <button onClick={selectAllColumns} className="select-all-btn">Select All</button>
-                          <button onClick={deselectAllColumns} className="deselect-all-btn">Deselect All</button>
-                          <button onClick={resetColumns} className="reset-btn">Reset</button>
+                          <button
+                            onClick={selectAllColumns}
+                            className="select-all-btn"
+                          >
+                            Select All
+                          </button>
+                          <button
+                            onClick={deselectAllColumns}
+                            className="deselect-all-btn"
+                          >
+                            Deselect All
+                          </button>
+                          <button onClick={resetColumns} className="reset-btn">
+                            Reset
+                          </button>
                         </div>
                       </div>
+                      
                       <div className="columns-list">
-                        {columns.map(column => (
-                          <label key={column.key} className="column-checkbox">
-                            <input
-                              type="checkbox"
-                              checked={visibleColumns[column.key]}
-                              onChange={() => toggleColumn(column.key)}
-                            />
-                            <span>{column.label}</span>
-                          </label>
+                        {Object.entries(groupedColumns).map(([category, cols]) => (
+                          <div key={category} className="column-category">
+                            <div className="column-category-title">
+                              {category} ({cols.length})
+                            </div>
+                            {cols.map((column) => (
+                              <label key={column.key} className="column-checkbox">
+                                <input
+                                  type="checkbox"
+                                  checked={visibleColumns[column.key]}
+                                  onChange={() => toggleColumn(column.key)}
+                                />
+                                <span>{column.label}</span>
+                              </label>
+                            ))}
+                          </div>
                         ))}
+                        
+                        {filteredColumns.length === 0 && (
+                          <div style={{ 
+                            textAlign: 'center', 
+                            padding: '40px 20px',
+                            color: '#9ca3af',
+                            fontSize: '13px'
+                          }}>
+                            No columns found matching "{filterSearchTerm}"
+                          </div>
+                        )}
                       </div>
                     </div>
 
-                    <button className="submit-btn" onClick={() => setOpenFilterIndex(null)}>
-                      Submit
+                    <button
+                      className="submit-btn"
+                      onClick={() => {
+                        setOpenFilterIndex(null);
+                        setFilterSearchTerm("");
+                      }}
+                    >
+                      Apply Changes
                     </button>
                   </div>
                 )}
               </div>
 
-              <select className="of-select">
-                <option>20</option>
-                <option>50</option>
+              <select className="of-select" defaultValue="20">
+                <option value="20">20 per page</option>
+                <option value="50">50 per page</option>
+                <option value="100">100 per page</option>
               </select>
             </div>
           </div>
 
-          {/* TABLE */}
+          {/* TABLE - Scrollable */}
           <div className="of-table-wrapper">
             <table className="of-table">
               <thead>
                 <tr>
-                  {/* Header Action Dropdown - Keeping original functionality */}
-                  <th>
+                  <th style={{ width: "40px" }}>
                     <div
                       className="action-trigger"
                       onClick={(e) => {
@@ -342,7 +448,7 @@ const AdvertisersPage = () => {
                               setSelectedIds(data.map((d) => d.id))
                             }
                           >
-                            Select All
+                            ✓ Select All
                           </div>
 
                           <div
@@ -355,7 +461,7 @@ const AdvertisersPage = () => {
                               )
                             }
                           >
-                            Select Approved
+                            ✓ Select Approved
                           </div>
 
                           <div
@@ -368,7 +474,7 @@ const AdvertisersPage = () => {
                               )
                             }
                           >
-                            Select Pending
+                            ⏳ Select Pending
                           </div>
 
                           <div
@@ -381,21 +487,21 @@ const AdvertisersPage = () => {
                               )
                             }
                           >
-                            Select Rejected
+                            ✗ Select Rejected
                           </div>
                         </div>
 
                         {/* STATUS */}
                         <div className="dropdown-section">
                           <div className="dropdown-title">
-                            Advertiser Status
+                            Bulk Status Update
                           </div>
 
                           <div
                             className="dropdown-item"
                             onClick={async () => {
                               if (selectedIds.length === 0) {
-                                alert("Please select advertiser");
+                                alert("Please select at least one advertiser");
                                 return;
                               }
 
@@ -405,16 +511,17 @@ const AdvertisersPage = () => {
 
                               setSelectedIds([]);
                               setOpenRowIndex(null);
+                              alert(`Approved ${selectedIds.length} advertiser(s)`);
                             }}
                           >
-                            ✓ Approve
+                            ✓ Approve Selected ({selectedIds.length})
                           </div>
 
                           <div
                             className="dropdown-item"
                             onClick={async () => {
                               if (selectedIds.length === 0) {
-                                alert("Please select advertiser");
+                                alert("Please select at least one advertiser");
                                 return;
                               }
 
@@ -424,9 +531,10 @@ const AdvertisersPage = () => {
 
                               setSelectedIds([]);
                               setOpenRowIndex(null);
+                              alert(`Rejected ${selectedIds.length} advertiser(s)`);
                             }}
                           >
-                            ✕ Reject
+                            ✗ Reject Selected ({selectedIds.length})
                           </div>
                         </div>
 
@@ -436,17 +544,17 @@ const AdvertisersPage = () => {
                             Advertiser Postback Token
                           </div>
 
-                          <div className="dropdown-item">🔒 Enable</div>
-                          <div className="dropdown-item">🔄 Refresh</div>
-                          <div className="dropdown-item">🗑 Disable</div>
+                          <div className="dropdown-item">🔒 Enable Token</div>
+                          <div className="dropdown-item">🔄 Refresh Token</div>
+                          <div className="dropdown-item">🗑 Disable Token</div>
                         </div>
 
                         {/* EMAIL */}
                         <div className="dropdown-section">
-                          <div className="dropdown-title">Email</div>
+                          <div className="dropdown-title">Email Actions</div>
 
                           <div className="dropdown-item">
-                            ✉ Send Email
+                            ✉ Send Bulk Email
                           </div>
                         </div>
                       </div>
@@ -454,7 +562,7 @@ const AdvertisersPage = () => {
                   </th>
 
                   {/* Render visible columns dynamically */}
-                  {visibleColumns.advertiserId && <th>AdvertiserID</th>}
+                  {visibleColumns.advertiserId && <th>Advertiser ID</th>}
                   {visibleColumns.name && <th>Name</th>}
                   {visibleColumns.email && <th>Email</th>}
                   {visibleColumns.contact && <th>Contact</th>}
@@ -464,7 +572,7 @@ const AdvertisersPage = () => {
                   {visibleColumns.address && <th>Address</th>}
                   {visibleColumns.city && <th>City</th>}
                   {visibleColumns.state && <th>State</th>}
-                  {visibleColumns.zipCode && <th>ZipCode</th>}
+                  {visibleColumns.zipCode && <th>Zip Code</th>}
                   {visibleColumns.createdOn && <th>Created On</th>}
                   {visibleColumns.status && <th>Status</th>}
                   {visibleColumns.options && <th>Options</th>}
@@ -474,21 +582,32 @@ const AdvertisersPage = () => {
               <tbody>
                 {loading ? (
                   <tr>
-                    <td colSpan="15" style={{ textAlign: "center" }}>
-                      Loading...
+                    <td
+                      colSpan="15"
+                      style={{ textAlign: "center", padding: "60px" }}
+                    >
+                      <div className="spinner" style={{ margin: "0 auto" }}></div>
+                      <p style={{ marginTop: "16px", color: "#6b7280" }}>Loading advertisers...</p>
                     </td>
                   </tr>
                 ) : filteredData.length === 0 ? (
                   <tr>
-                    <td colSpan="15" style={{ textAlign: "center" }}>
-                      No Data Found
+                    <td
+                      colSpan="15"
+                      style={{ textAlign: "center", padding: "60px" }}
+                    >
+                      <div style={{ fontSize: "48px", marginBottom: "16px" }}>📊</div>
+                      <p style={{ color: "#6b7280", fontSize: "16px" }}>No advertisers found</p>
+                      <p style={{ color: "#9ca3af", fontSize: "14px", marginTop: "8px" }}>
+                        Try adjusting your search or add a new advertiser
+                      </p>
                     </td>
                   </tr>
                 ) : (
                   filteredData.map((row, index) => (
-                    <tr key={index}>
-                      {/* Checkbox column - Keeping original functionality */}
-                      <td>
+                    <tr key={row.id}>
+                      {/* Checkbox column */}
+                      <td style={{ width: "40px", textAlign: "center" }}>
                         <input
                           type="checkbox"
                           checked={selectedIds.includes(row.id)}
@@ -509,19 +628,20 @@ const AdvertisersPage = () => {
                           className="link"
                           onClick={() => navigate(`/advertiser/${row.id}`)}
                         >
-                          {row.id}
+                          #{row.id}
                         </td>
                       )}
-                      
+
                       {visibleColumns.name && (
                         <td
                           className="link"
                           onClick={() => navigate(`/advertiser/${row.id}`)}
+                          style={{ fontWeight: "500" }}
                         >
                           {row.name}
                         </td>
                       )}
-                      
+
                       {visibleColumns.email && (
                         <td
                           className="link"
@@ -530,7 +650,7 @@ const AdvertisersPage = () => {
                           {row.email}
                         </td>
                       )}
-                      
+
                       {visibleColumns.contact && <td>{row.contact}</td>}
                       {visibleColumns.company && <td>{row.company}</td>}
                       {visibleColumns.country && <td>{row.country}</td>}
@@ -576,28 +696,30 @@ const AdvertisersPage = () => {
                               <div className="row-dropdown">
                                 <div
                                   className="dropdown-item"
-                                  onClick={() =>
-                                    updateStatus(row.id, "Approved")
-                                  }
+                                  onClick={() => {
+                                    updateStatus(row.id, "Approved");
+                                    setOpenRowIndex(null);
+                                  }}
                                 >
                                   ✓ Approve
                                 </div>
 
                                 <div
                                   className="dropdown-item"
-                                  onClick={() =>
-                                    updateStatus(row.id, "Rejected")
-                                  }
+                                  onClick={() => {
+                                    updateStatus(row.id, "Rejected");
+                                    setOpenRowIndex(null);
+                                  }}
                                 >
                                   ✕ Reject
                                 </div>
 
                                 <div className="dropdown-item">
-                                  🔗 Advertiser Postback URL
+                                  🔗 Postback URL
                                 </div>
                                 <div className="dropdown-item">📊 Reports</div>
                                 <div className="dropdown-item">🎯 Offers</div>
-                                <div className="dropdown-item">✉ Email</div>
+                                <div className="dropdown-item">✉ Send Email</div>
 
                                 <div className="dropdown-item danger">
                                   🗑 Delete
