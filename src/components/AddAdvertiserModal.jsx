@@ -5,10 +5,8 @@ import { useNavigate } from "react-router-dom";
 const AddAdvertiserModal = ({ onClose }) => {
   const navigate = useNavigate();
 
-  // GET USER FROM LOCALSTORAGE
   const user = JSON.parse(localStorage.getItem("user"));
 
-  // FORM STATE
   const [formData, setFormData] = useState({
     firstName: "",
     lastName: "",
@@ -23,7 +21,9 @@ const AddAdvertiserModal = ({ onClose }) => {
 
   const [loading, setLoading] = useState(false);
 
-  // HANDLE INPUT CHANGE
+  // ✅ NEW STATE
+  const [advertiserId, setAdvertiserId] = useState(null);
+
   const handleChange = (e) => {
     const { name, value, type, checked } = e.target;
 
@@ -33,13 +33,11 @@ const AddAdvertiserModal = ({ onClose }) => {
     });
   };
 
-  // GENERATE PASSWORD
   const generatePassword = () => {
     const random = Math.random().toString(36).slice(-8);
     setFormData({ ...formData, passwordHash: random });
   };
 
-  // SUBMIT API
   const handleSubmit = async () => {
     if (!user?.id) {
       alert("User not logged in ❌");
@@ -54,7 +52,7 @@ const AddAdvertiserModal = ({ onClose }) => {
     try {
       setLoading(true);
 
-      await fetch("https://localhost:7129/api/Advertisers", {
+      const response = await fetch("https://localhost:7129/api/Advertisers", {
         method: "POST",
         headers: {
           "Content-Type": "application/json",
@@ -68,9 +66,14 @@ const AddAdvertiserModal = ({ onClose }) => {
         })
       });
 
+      const data = await response.json();
+
+      // ✅ SET ADVERTISER ID
+      setAdvertiserId(data.id);
+
       alert("Advertiser Created Successfully ✅");
-      onClose();
-      navigate("/advertisers");
+
+      // ❌ REMOVED onClose() and navigate()
 
     } catch (error) {
       console.error(error);
@@ -89,8 +92,8 @@ const AddAdvertiserModal = ({ onClose }) => {
           <span className="close-btn" onClick={onClose}>✖</span>
         </div>
 
-        {/* BODY - Fixed structure */}
         <div className="modal-body">
+
           {/* NAME */}
           <div className="form-row">
             <label>Name *</label>
@@ -135,29 +138,39 @@ const AddAdvertiserModal = ({ onClose }) => {
           {/* PASSWORD */}
           <div className="form-row">
             <label>Password *</label>
-            <div className="">
-              <input
-                name="passwordHash"
-                value={formData.passwordHash}
-                onChange={handleChange}
-                placeholder="Enter or generate password"
-              />
-              <button
-                className="btn small"
-                type="button"
-                onClick={generatePassword}
-              >
-                Generate
-              </button>
+            <div className="row">
+              <div className="col-md-9">
+                <input
+                  name="passwordHash"
+                  value={formData.passwordHash}
+                  onChange={handleChange}
+                  placeholder="Enter or generate password"
+                  className="form-control"
+                />
+              </div>
+              <div className="col-md-3">
+                <button
+                  className="btn btn-secondary small"
+                  type="button"
+                  onClick={generatePassword}
+                  style={{ width: "100%" }}
+                >
+                  Generate Password
+                </button>
+              </div>
             </div>
           </div>
 
           {/* ACCOUNT MANAGER */}
           <div className="form-row">
             <label>Account Manager</label>
-            <input 
-              value={user?.firstName ? `${user.firstName} ${user.lastName || ''}` : ""} 
-              disabled 
+            <input
+              value={
+                user?.firstName
+                  ? `${user.firstName} ${user.lastName || ""}`
+                  : ""
+              }
+              disabled
             />
           </div>
 
@@ -186,21 +199,71 @@ const AddAdvertiserModal = ({ onClose }) => {
               />
               <span className="slider"></span>
             </label>
-            <span className="toggle-label">
-              Send Credentials to User
-            </span>
+            <span>Send Credentials to User</span>
           </div>
 
-          {/* SUBMIT BUTTON */}
-          <div className="form-actions">
-            <button
-              className="btn primary"
-              onClick={handleSubmit}
-              disabled={loading}
-            >
-              {loading ? "Creating..." : "Submit"}
-            </button>
-          </div>
+          {/* BUTTONS */}
+           <div className="row">
+             <div className="col-md-8">
+               {/* yaha tera form ya content */}
+             </div>
+           
+             <div className="col-md-4 d-flex justify-content-end gap-2">
+               <button
+                 className="btn btn-secondary"
+                 onClick={onClose}
+                 disabled={loading}
+               >
+                 Cancel
+               </button>
+           
+               <button
+                 className="btn btn-primary"
+                 onClick={handleSubmit}
+                 disabled={loading}
+               >
+                 {loading ? "Creating..." : "Submit"}
+               </button>
+             </div>
+           </div>
+
+          {/* ✅ SHOW AFTER SUCCESS */}
+{advertiserId && (
+  <>
+    <hr />
+
+    <div className="advertiser-result row align-items-center">
+      
+      {/* Advertiser ID (Clickable) */}
+      <div className="col-md-6">
+        <p className="mb-0">
+          <b>Advertiser ID :</b>{" "}
+          <span
+            className="advertiser-link"
+            onClick={() => navigate(`/advertiser/${advertiserId}`)}
+          >
+            {advertiserId}
+          </span>
+        </p>
+      </div>
+
+      {/* Empty space */}
+      <div className="col-md-3"></div>
+
+      {/* Icon Button */}
+      <div className="col-md-3 text-end">
+        <button
+          className="btn btn-light icon-btn"
+          onClick={() => navigate(`/advertiser/${advertiserId}`)}
+        >
+          👁️
+        </button>
+      </div>
+
+    </div>
+  </>
+)}
+
         </div>
       </div>
     </div>
