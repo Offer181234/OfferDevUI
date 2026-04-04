@@ -167,11 +167,11 @@ const AdvertiserDetails = () => {
 
               {/* HEADER */}
               <div className="profile-header">
-                <div className="avatar">
-                  {selected
-                    ? `${selected.firstName?.charAt(0)}${selected.lastName?.charAt(0)}`
-                    : "NA"}
-                </div>
+               <div className="avatar">
+                 {selected
+                   ? `${selected.firstName?.charAt(0)?.toUpperCase()}${selected.lastName?.charAt(0)?.toUpperCase()}`
+                   : "NA"}
+               </div>
 
                 <div style={{ width: "100%" }}>
                   <div className="profile-header-top">
@@ -186,7 +186,11 @@ const AdvertiserDetails = () => {
                     )}
                   </div>
 
-                  <h3>{selected?.firstName} {selected?.lastName}</h3>
+                 <h3>
+                    {selected?.firstName ? selected.firstName.charAt(0).toUpperCase() + selected.firstName.slice(1).toLowerCase() : ''}
+                    {selected?.firstName && selected?.lastName ? ' ' : ''}
+                    {selected?.lastName ? selected.lastName.charAt(0).toUpperCase() + selected.lastName.slice(1).toLowerCase() : ''}
+                  </h3>
                   <p className="sub-text">{selected?.companyName}</p>
                   <span className={getStatusClass(selected?.status)}>
                     {getStatusIcon(selected?.status)} {selected?.status || 'N/A'}
@@ -323,25 +327,25 @@ const AdvertiserDetails = () => {
                       <span>{selected?.email}</span>
                     }
                   </div>
-             <div className="info-row">
-  <label>Status</label>
-  {isEdit ? (
-    <select
-      value={formData?.status || "Active"}
-      onChange={(e) =>
-        setFormData({ ...formData, status: e.target.value })
-      }
-    >
-      <option value="Active">Active</option>
-      <option value="Pending">Pending</option>
-      <option value="Rejected">Rejected</option>
-    </select>
-  ) : (
-    <span className={getStatusClass(selected?.status)}>
-      {getStatusIcon(selected?.status)} {selected?.status || 'N/A'}
-    </span>
-  )}
-</div>
+                   <div className="info-row">
+                    <label>Status</label>
+                    {isEdit ? (
+                      <select
+                        value={formData?.status || "Active"}
+                        onChange={(e) =>
+                          setFormData({ ...formData, status: e.target.value })
+                        }
+                      >
+                        <option value="Active">Active</option>
+                        <option value="Pending">Pending</option>
+                        <option value="Rejected">Rejected</option>
+                      </select>
+                    ) : (
+                      <span className={getStatusClass(selected?.status)}>
+                        {getStatusIcon(selected?.status)} {selected?.status || 'N/A'}
+                      </span>
+                    )}
+                  </div>
                   <div className="info-row">
                     <label>Postback IP</label>
                     {isEdit ? 
@@ -374,16 +378,31 @@ const AdvertiserDetails = () => {
               </div>
 
               {/* ACTION BUTTONS - NOW ON RIGHT SIDE IN SINGLE ROW */}
-              {isEdit && (
-                <div className="edit-actions">
-                  <button className="cancel-btn-small" onClick={handleCancel}>
-                    Cancel
-                  </button>
-                  <button className="submit-btn-small" onClick={handleSubmit}>
-                    Save Changes
-                  </button>
-                </div>
-              )}
+                {isEdit && (
+                  <div className="row align-items-center mt-3">
+                    
+                    {/* Left side (empty or content) */}
+                    <div className="col-md-8"></div>
+                
+                    {/* Right side buttons */}
+                    <div className="col-md-4 d-flex justify-content-end gap-2">
+                      <button
+                        className="cancel-btn-small"
+                        onClick={handleCancel}
+                      >
+                        Cancel
+                      </button>
+                
+                      <button
+                        className="submit-btn-small"
+                        onClick={handleSubmit}
+                      >
+                        Save
+                      </button>
+                    </div>
+                
+                  </div>
+                )}
 
             </div>
           </div>

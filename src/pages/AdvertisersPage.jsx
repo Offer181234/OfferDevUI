@@ -20,6 +20,11 @@ const AdvertisersPage = () => {
   const [openRowIndex, setOpenRowIndex] = useState(null);
   const [openFilterIndex, setOpenFilterIndex] = useState(null);
 
+  // Pagination state
+  const [currentPage, setCurrentPage] = useState(1);
+  const [itemsPerPage, setItemsPerPage] = useState(20);
+  const [totalItems, setTotalItems] = useState(0);
+
   // Selection
   const [selectedIds, setSelectedIds] = useState([]);
 
@@ -43,7 +48,16 @@ const AdvertisersPage = () => {
     zipCode: true,
     createdOn: true,
     status: true,
+    jobTitle:true,
+    social:true,
+    lastLogin:true,
+    signupDate:true,
+    signupIP:true,
+    timeZone:true,
+    currency:true,
+    postbackWhitelistIP:true,
     options: true,
+    postbackToken:true,
   });
 
   // Column definitions with categories for better organization
@@ -54,15 +68,24 @@ const AdvertisersPage = () => {
     { key: "email", label: "Email", category: "Contact Info" },
     { key: "contact", label: "Contact", category: "Contact Info" },
     { key: "company", label: "Company", category: "Business Info" },
-    { key: "country", label: "Country", category: "Location" },
-    { key: "manager", label: "Manager", category: "Business Info" },
+    { key: "jobTitle", label: "JobTitle", category: "Business Info" },
     { key: "address", label: "Address", category: "Location" },
     { key: "city", label: "City", category: "Location" },
     { key: "state", label: "State", category: "Location" },
+    { key: "country", label: "Country", category: "Location" },
+    { key: "social", label: "Social", category: "Location" },
+    { key: "lastLogin", label: "LastLogin", category: "Location" },
+    { key: "signupDate", label: "SignupDate", category: "Location" },
+    { key: "signupIP", label: "SignupIP", category: "Location" },
+    { key: "timeZone", label: "TimeZone", category: "Location" },
+    { key: "currency", label: "Currency", category: "Location" },
+    { key: "postbackWhitelistIP", label: "PostbackWhitelistIP", category: "Location" },
+    { key: "manager", label: "Manager", category: "Business Info" },
     { key: "zipCode", label: "Zip Code", category: "Location" },
     { key: "createdOn", label: "Created On", category: "System Info" },
     { key: "status", label: "Status", category: "System Info" },
     { key: "options", label: "Options", category: "Actions" },
+    { key: "postbackToken", label: "PostbackToken", category: "Actions" },
   ];
 
   // Filter columns based on search term
@@ -93,35 +116,43 @@ const AdvertisersPage = () => {
 
   // API
   useEffect(() => {
-    setLoading(true);
-    fetch("https://localhost:7129/api/Advertisers")
-      .then((res) => res.json())
-      .then((resData) => {
-        console.log(resData);
-        const formatted = resData.map((item) => ({
-          id: item.id,
-          name: `${item.firstName} ${item.lastName}`,
-          email: item.email,
-          company: item.companyName || "-",
-          contact: item.mobileNumber || "-",
-          country: item.country || "-",
-          manager: item.accountManagerId || "-",
-          status: item.status || "Pending",
-          address: item.address || "-",
-          city: item.city || "-",
-          state: item.state || "-",
-          zipCode: item.zipCode || "-",
-          createdOn: item.createdOn
-            ? new Date(item.createdOn).toLocaleDateString()
-            : "-",
-          isActive: item.isActive,
-        }));
-
-        setData(formatted);
-        setLoading(false);
-      })
-      .catch(() => setLoading(false));
+    fetchData();
   }, []);
+
+  const fetchData = async () => {
+    try {
+      setLoading(true);
+      const response = await fetch("https://localhost:7129/api/Advertisers");
+      const resData = await response.json();
+      
+      console.log(resData);
+      const formatted = resData.map((item) => ({
+        id: item.id,
+        name: `${item.firstName} ${item.lastName}`,
+        email: item.email,
+        company: item.companyName || "-",
+        contact: item.mobileNumber || "-",
+        country: item.country || "-",
+        manager: item.accountManagerId || "-",
+        status: item.status || "Pending",
+        address: item.address || "-",
+        city: item.city || "-",
+        state: item.state || "-",
+        zipCode: item.zipCode || "-",
+        createdOn: item.createdOn
+          ? new Date(item.createdOn).toLocaleDateString()
+          : "-",
+        isActive: item.isActive,
+      }));
+
+      setData(formatted);
+      setTotalItems(formatted.length);
+      setLoading(false);
+    } catch (err) {
+      console.error(err);
+      setLoading(false);
+    }
+  };
 
   const updateStatus = async (id, status) => {
     try {
@@ -171,12 +202,80 @@ const AdvertisersPage = () => {
     return () => window.removeEventListener("click", close);
   }, []);
 
+  // Filtered data based on search
   const filteredData = data.filter((row) =>
     (row.name || "").toLowerCase().includes(searchTerm.toLowerCase()) ||
     (row.email || "").toLowerCase().includes(searchTerm.toLowerCase()) ||
     (row.company || "").toLowerCase().includes(searchTerm.toLowerCase()) ||
     row.id.toString().includes(searchTerm)
   );
+
+  // Update total items when filtered data changes
+  useEffect(() => {
+    setTotalItems(filteredData.length);
+    setCurrentPage(1); // Reset to first page when search changes
+  }, [searchTerm, filteredData.length]);
+
+  // Pagination logic
+  const indexOfLastItem = currentPage * itemsPerPage;
+  const indexOfFirstItem = indexOfLastItem - itemsPerPage;
+  const currentItems = filteredData.slice(indexOfFirstItem, indexOfLastItem);
+  const totalPages = Math.ceil(totalItems / itemsPerPage);
+
+  // Change page
+  const paginate = (pageNumber) => setCurrentPage(pageNumber);
+  
+  // Go to next page
+  const nextPage = () => {
+    if (currentPage < totalPages) {
+      setCurrentPage(currentPage + 1);
+    }
+  };
+  
+  // Go to previous page
+  const prevPage = () => {
+    if (currentPage > 1) {
+      setCurrentPage(currentPage - 1);
+    }
+  };
+
+  // Handle items per page change
+  const handleItemsPerPageChange = (e) => {
+    const newItemsPerPage = parseInt(e.target.value);
+    setItemsPerPage(newItemsPerPage);
+    setCurrentPage(1); // Reset to first page
+  };
+
+  // Generate page numbers to display
+  const getPageNumbers = () => {
+    const pageNumbers = [];
+    const maxPagesToShow = 5;
+    
+    if (totalPages <= maxPagesToShow) {
+      for (let i = 1; i <= totalPages; i++) {
+        pageNumbers.push(i);
+      }
+    } else {
+      const startPage = Math.max(1, currentPage - Math.floor(maxPagesToShow / 2));
+      const endPage = Math.min(totalPages, startPage + maxPagesToShow - 1);
+      
+      if (startPage > 1) {
+        pageNumbers.push(1);
+        if (startPage > 2) pageNumbers.push('...');
+      }
+      
+      for (let i = startPage; i <= endPage; i++) {
+        pageNumbers.push(i);
+      }
+      
+      if (endPage < totalPages) {
+        if (endPage < totalPages - 1) pageNumbers.push('...');
+        pageNumbers.push(totalPages);
+      }
+    }
+    
+    return pageNumbers;
+  };
 
   // Toggle column visibility
   const toggleColumn = (columnKey) => {
@@ -207,21 +306,30 @@ const AdvertisersPage = () => {
   // Reset to default columns
   const resetColumns = () => {
     setVisibleColumns({
-      checkbox: true,
-      advertiserId: true,
-      name: true,
-      email: true,
-      contact: true,
-      company: true,
-      country: true,
-      manager: true,
-      address: true,
-      city: true,
-      state: true,
-      zipCode: true,
-      createdOn: true,
-      status: true,
-      options: true,
+    checkbox: true,
+    advertiserId: true,
+    name: true,
+    email: true,
+    contact: true,
+    company: true,
+    country: true,
+    manager: true,
+    address: true,
+    city: true,
+    state: true,
+    zipCode: true,
+    createdOn: true,
+    status: true,
+    jobTitle:true,
+    social:true,
+    lastLogin:true,
+    signupDate:true,
+    signupIP:true,
+    timeZone:true,
+    currency:true,
+    postbackWhitelistIP:true,
+    options: true,
+    PostbackToken:true,
     });
   };
 
@@ -327,7 +435,6 @@ const AdvertisersPage = () => {
                           onChange={(e) => setFilterSearchTerm(e.target.value)}
                           autoFocus
                         />
-                       
                       </div>
                     </div>
 
@@ -405,7 +512,12 @@ const AdvertisersPage = () => {
                 )}
               </div>
 
-              <select className="of-select" defaultValue="20">
+              <select 
+                className="of-select" 
+                value={itemsPerPage}
+                onChange={handleItemsPerPageChange}
+              >
+                <option value="10">10 per page</option>
                 <option value="20">20 per page</option>
                 <option value="50">50 per page</option>
                 <option value="100">100 per page</option>
@@ -445,49 +557,65 @@ const AdvertisersPage = () => {
                           <div
                             className="dropdown-item"
                             onClick={() =>
-                              setSelectedIds(data.map((d) => d.id))
+                              setSelectedIds(currentItems.map((d) => d.id))
                             }
                           >
-                            ✓ Select All
+                            ✓ Select All (Current Page)
+                          </div>
+
+                          <div
+                            className="dropdown-item"
+                            onClick={() =>
+                              setSelectedIds(filteredData.map((d) => d.id))
+                            }
+                          >
+                            ✓ Select All (All Pages)
                           </div>
 
                           <div
                             className="dropdown-item"
                             onClick={() =>
                               setSelectedIds(
-                                data
+                                currentItems
                                   .filter((d) => d.status === "Approved")
                                   .map((d) => d.id)
                               )
                             }
                           >
-                            ✓ Select Approved
+                            ✓ Select Approved (Current Page)
                           </div>
 
                           <div
                             className="dropdown-item"
                             onClick={() =>
                               setSelectedIds(
-                                data
+                                currentItems
                                   .filter((d) => d.status === "Pending")
                                   .map((d) => d.id)
                               )
                             }
                           >
-                            ⏳ Select Pending
+                            ⏳ Select Pending (Current Page)
                           </div>
 
                           <div
                             className="dropdown-item"
                             onClick={() =>
                               setSelectedIds(
-                                data
+                                currentItems
                                   .filter((d) => d.status === "Rejected")
                                   .map((d) => d.id)
                               )
                             }
                           >
-                            ✗ Select Rejected
+                            ✗ Select Rejected (Current Page)
+                          </div>
+
+                          <div
+                            className="dropdown-item"
+                            onClick={() => setSelectedIds([])}
+                          >
+                            Clear Selection
                           </div>
                         </div>
 
@@ -567,15 +695,24 @@ const AdvertisersPage = () => {
                   {visibleColumns.email && <th>Email</th>}
                   {visibleColumns.contact && <th>Contact</th>}
                   {visibleColumns.company && <th>Company</th>}
-                  {visibleColumns.country && <th>Country</th>}
-                  {visibleColumns.manager && <th>Manager</th>}
+                  {visibleColumns.jobTitle && <th>Job Title</th>}
                   {visibleColumns.address && <th>Address</th>}
                   {visibleColumns.city && <th>City</th>}
                   {visibleColumns.state && <th>State</th>}
+                  {visibleColumns.country && <th>Country</th>}
+                  {visibleColumns.social && <th>Social</th>}
+                  {visibleColumns.lastLogin && <th>LastLogin</th>}
+                  {visibleColumns.signupDate && <th>Signup Date</th>}
+                  {visibleColumns.signupIP && <th>Signup IP</th>}
+                  {visibleColumns.timeZone && <th>Time Zone</th>}
+                  {visibleColumns.currency && <th>Currency</th>}
+                  {visibleColumns.postbackWhitelistIP && <th>PostbackWhitelistIP</th>}
+                  {visibleColumns.manager && <th>Manager</th>}
                   {visibleColumns.zipCode && <th>Zip Code</th>}
                   {visibleColumns.createdOn && <th>Created On</th>}
                   {visibleColumns.status && <th>Status</th>}
                   {visibleColumns.options && <th>Options</th>}
+                  {visibleColumns.postbackToken && <th>PostbackToken</th>}
                 </tr>
               </thead>
 
@@ -590,7 +727,7 @@ const AdvertisersPage = () => {
                       <p style={{ marginTop: "16px", color: "#6b7280" }}>Loading advertisers...</p>
                     </td>
                   </tr>
-                ) : filteredData.length === 0 ? (
+                ) : currentItems.length === 0 ? (
                   <tr>
                     <td
                       colSpan="15"
@@ -604,7 +741,7 @@ const AdvertisersPage = () => {
                     </td>
                   </tr>
                 ) : (
-                  filteredData.map((row, index) => (
+                  currentItems.map((row, index) => (
                     <tr key={row.id}>
                       {/* Checkbox column */}
                       <td style={{ width: "40px", textAlign: "center" }}>
@@ -653,14 +790,21 @@ const AdvertisersPage = () => {
 
                       {visibleColumns.contact && <td>{row.contact}</td>}
                       {visibleColumns.company && <td>{row.company}</td>}
-                      {visibleColumns.country && <td>{row.country}</td>}
-                      {visibleColumns.manager && <td>{row.manager}</td>}
+                      {visibleColumns.jobTitle && <td>{row.jobTitle}</td>}
                       {visibleColumns.address && <td>{row.address}</td>}
                       {visibleColumns.city && <td>{row.city}</td>}
                       {visibleColumns.state && <td>{row.state}</td>}
+                      {visibleColumns.country && <td>{row.country}</td>}
+                      {visibleColumns.social && <td>{row.social}</td>}
+                      {visibleColumns.lastLogin && <td>{row.lastLogin}</td>}
+                      {visibleColumns.signupDate && <td>{row.signupDate}</td>}
+                      {visibleColumns.signupIP && <td>{row.signupIP}</td>}
+                      {visibleColumns.timeZone && <td>{row.timeZone}</td>}
+                      {visibleColumns.currency && <td>{row.currency}</td>}
+                      {visibleColumns.postbackWhitelistIP && <td>{row.postbackWhitelistIP}</td>}
+                      {visibleColumns.manager && <td>{row.manager}</td>}
                       {visibleColumns.zipCode && <td>{row.zipCode}</td>}
                       {visibleColumns.createdOn && <td>{row.createdOn}</td>}
-
                       {visibleColumns.status && (
                         <td>
                           <span
@@ -729,12 +873,59 @@ const AdvertisersPage = () => {
                           </div>
                         </td>
                       )}
+                    {visibleColumns.postbackToken && <td>{row.postbackToken}</td>}
                     </tr>
                   ))
                 )}
               </tbody>
             </table>
           </div>
+
+          {/* Pagination Component */}
+
+
+{/* Pagination Component */}
+{!loading && totalItems > 0 && (
+  <div className="pagination-container">
+    <div className="pagination-info">
+      Showing {indexOfFirstItem + 1} to {Math.min(indexOfLastItem, totalItems)} of {totalItems} entries
+    </div>
+    <div className="pagination-controls">
+      <button
+        onClick={prevPage}
+        disabled={currentPage === 1}
+        className="pagination-nav-btn"
+      >
+        <svg width="16" height="16" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+          <path d="M15 18L9 12L15 6" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"/>
+        </svg>
+      </button>
+      
+      <div className="pagination-numbers">
+        {getPageNumbers().map((pageNumber, index) => (
+          <button
+            key={index}
+            onClick={() => typeof pageNumber === 'number' && paginate(pageNumber)}
+            className={`pagination-number ${currentPage === pageNumber ? 'active' : ''} ${typeof pageNumber !== 'number' ? 'dots' : ''}`}
+            disabled={typeof pageNumber !== 'number'}
+          >
+            {pageNumber}
+          </button>
+        ))}
+      </div>
+      
+      <button
+        onClick={nextPage}
+        disabled={currentPage === totalPages}
+        className="pagination-nav-btn"
+      >
+        <svg width="16" height="16" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+          <path d="M9 18L15 12L9 6" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"/>
+        </svg>
+      </button>
+    </div>
+  </div>
+)}
         </div>
 
         {showModal && (
